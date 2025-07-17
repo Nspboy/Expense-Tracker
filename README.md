@@ -103,4 +103,4 @@ Contributions are welcome! Please open issues or submit pull requests for improv
 
 - Static files and templates are configured via Django settings (`settings.py`). Place your static assets and templates in their respective directories as per the configuration.
 - Default database is SQLite. You may configure another backend in `settings.py`.
-- SMTP settings are available for email; configure your credentials in `settings.py` to enable email features.
+- SMTP settings are available for email; configure your credentials in `settings.py` to enable email features..
