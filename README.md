@@ -16,7 +16,7 @@ A Django-based web application for tracking personal expenses and income, design
 
 ## Features
 
-- **User Authentication:** Register, login, and manage user profiles.
+- **User Authentication:** Register, login, and manage user profiles. 
 - **Expense & Income Tracking:** Add, edit, and delete financial records categorized by type (Expense/Income) and category (Food, Travel, Shopping, Necessities, Entertainment, Other).
 - **Categories:** Customizable categories for organizing expenses.
 - **Statistics & Reports:** View weekly, monthly, and yearly summaries of spending and savings, including category-wise breakdowns.
