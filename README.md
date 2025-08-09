@@ -21,7 +21,7 @@ A Django-based web application for tracking personal expenses and income, design
 - **Categories:** Customizable categories for organizing expenses.
 - **Statistics & Reports:** View weekly, monthly, and yearly summaries of spending and savings, including category-wise breakdowns.
 - **Visualizations:** Chart views to help visualize income and expense trends.
-- **Savings Tracking:** Track user savings and get warnings if expenses exceed savings.
+- **Savings Tracking:** Track user savings and get warnings if expenses exceed saving. 
 - **Admin Panel:** Manage users and financial records through Django admin.
 
 ## Tech Stack
