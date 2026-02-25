@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)  # type: ignore[call-arg]
+    user = UserSerializer(read_only=True)
     class Meta:
         model = UserProfile
         fields = ['profession', 'Savings', 'income', 'currency', 'theme', 'user']
