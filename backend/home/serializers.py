@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from .models import UserProfile, Category, Expense, Income, Budget, Reminder, Goal
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,6 +30,23 @@ class IncomeSerializer(serializers.ModelSerializer):
         model = Income
         fields = '__all__'
 
+class GoalSerializer(serializers.ModelSerializer):
+    progress_percentage = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Goal
+        fields = '__all__'
+
+    def get_progress_percentage(self, obj):
+        if obj.target_amount == 0:
+            return 0
+        return min(int((obj.current_amount / obj.target_amount) * 100), 100)
+
+class ReminderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reminder
+        fields = '__all__'
+
 class BudgetSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
     consumed_amount = serializers.SerializerMethodField()
@@ -38,9 +56,10 @@ class BudgetSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_consumed_amount(self, obj):
-        return Expense.objects.filter(
+        result = Expense.objects.filter(
             user=obj.user,
             category=obj.category,
             date__month=obj.month,
             date__year=obj.year
-        ).aggregate(total=serializers.DecimalField(max_digits=12, decimal_places=2).to_internal_value(0))['total'] or 0
+        ).aggregate(total=Sum('amount'))['total']
+        return result or 0

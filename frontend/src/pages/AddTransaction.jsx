@@ -14,8 +14,10 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '../context/ToastContext';
 
 const AddTransaction = () => {
+    const { addToast } = useToast();
     const [type, setType] = useState('Expense');
     const [formData, setFormData] = useState({
         title: '',
@@ -29,12 +31,25 @@ const AddTransaction = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const res = await api.get('categories/');
                 setCategories(res.data.filter(cat => cat.type === type));
-            } catch (err) {
+            } catch {
                 console.error('Failed to fetch categories');
             }
         };
@@ -56,8 +71,10 @@ const AddTransaction = () => {
             } else {
                 await api.post('income/', payload);
             }
+            addToast(`${type} added successfully!`, 'success');
             navigate(-1);
-        } catch (err) {
+        } catch {
+            addToast(`Failed to add ${type.toLowerCase()}. Please try again.`, 'error');
             console.error('Failed to add transaction');
         } finally {
             setLoading(false);
@@ -140,7 +157,12 @@ const AddTransaction = () => {
                 </div>
 
                 <form onSubmit={onSubmit}>
-                    <div className="form-group">
+                    <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                    <motion.div variants={itemVariants} className="form-group">
                         <label className="form-label">{type === 'Expense' ? 'Transaction Name' : 'Income Source'}</label>
                         <div style={{ position: 'relative' }}>
                             <Tag style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-muted)' }} size={20} />
@@ -154,9 +176,9 @@ const AddTransaction = () => {
                                 required
                             />
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    <motion.div variants={itemVariants} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                         <div className="form-group">
                             <label className="form-label">Amount ($)</label>
                             <div style={{ position: 'relative' }}>
@@ -185,9 +207,9 @@ const AddTransaction = () => {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    <motion.div variants={itemVariants} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                         <div className="form-group">
                             <label className="form-label">Category</label>
                             <div style={{ position: 'relative' }}>
@@ -222,9 +244,9 @@ const AddTransaction = () => {
                                 <ChevronDown style={{ position: 'absolute', right: '16px', top: '16px', pointerEvents: 'none', color: 'var(--text-muted)' }} size={20} />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="form-group">
+                    <motion.div variants={itemVariants} className="form-group">
                         <label className="form-label">Notes</label>
                         <div style={{ position: 'relative' }}>
                             <FileText style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-muted)' }} size={20} />
@@ -236,9 +258,10 @@ const AddTransaction = () => {
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             />
                         </div>
-                    </div>
+                    </motion.div>
 
                     <motion.button 
+                        variants={itemVariants}
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                         type="submit" 
@@ -248,7 +271,8 @@ const AddTransaction = () => {
                             background: type === 'Expense' ? 'var(--primary)' : 'var(--success)',
                             boxShadow: type === 'Expense' ? '0 8px 20px rgba(94, 92, 230, 0.3)' : '0 8px 20px rgba(52, 199, 89, 0.3)',
                             marginTop: '24px',
-                            height: '60px'
+                            height: '60px',
+                            width: '100%'
                         }}
                     >
                         {loading ? 'Processing...' : (
@@ -257,6 +281,7 @@ const AddTransaction = () => {
                             </div>
                         )}
                     </motion.button>
+                </motion.div>
                 </form>
             </div>
         </motion.div>

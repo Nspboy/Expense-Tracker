@@ -27,6 +27,7 @@ import {
     ArcElement 
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { CardSkeleton, TableRowSkeleton } from '../components/SkeletonLoader';
 
 ChartJS.register(
     CategoryScale,
@@ -43,6 +44,23 @@ const Dashboard = () => {
     const [recentExpenses, setRecentExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { 
+            y: 0, 
+            opacity: 1,
+            transition: { ease: 'easeOut', duration: 0.5 }
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -66,7 +84,7 @@ const Dashboard = () => {
         { label: 'Total balance', value: summary.balance, trend: '+12.1%', isUp: true },
         { label: 'Income', value: summary.total_income, trend: '+6.1%', isUp: true },
         { label: 'Expense', value: summary.total_expense, trend: '-2.4%', isUp: false },
-        { label: 'Total savings', value: 32913.00, trend: '+12.1%', isUp: true },
+        { label: 'Total savings', value: summary.total_savings || 0, trend: '+12.1%', isUp: true },
     ];
 
     const moneyFlowData = {
@@ -103,12 +121,29 @@ const Dashboard = () => {
         ],
     };
 
-    if (loading) return null;
+    if (loading) return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div className="flux-grid">
+                {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '6.5fr 3.5fr', gap: '24px' }}>
+                <div className="flux-card" style={{ height: '380px' }}>
+                    <TableRowSkeleton />
+                    <TableRowSkeleton />
+                </div>
+                <div className="flux-card" style={{ height: '380px' }}>
+                    <TableRowSkeleton />
+                    <TableRowSkeleton />
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
             style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
         >
             {/* Top Stat Cards */}
@@ -116,9 +151,7 @@ const Dashboard = () => {
                 {stats.map((stat, idx) => (
                     <motion.div 
                         key={idx} 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
+                        variants={itemVariants}
                         className="flux-card"
                     >
                         <div className="flux-card-header">

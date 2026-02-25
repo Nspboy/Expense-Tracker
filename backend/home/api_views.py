@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 from .models import UserProfile, Category, Expense, Income, Budget, Reminder, Goal
 from .serializers import (
     UserProfileSerializer, CategorySerializer, ExpenseSerializer, 
-    IncomeSerializer, BudgetSerializer, UserSerializer
+    IncomeSerializer, BudgetSerializer, UserSerializer,
+    GoalSerializer, ReminderSerializer
 )
 import datetime
 
@@ -35,6 +36,45 @@ class IncomeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+class GoalViewSet(viewsets.ModelViewSet):
+    serializer_class = GoalSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Goal.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class ReminderViewSet(viewsets.ModelViewSet):
+    serializer_class = ReminderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Reminder.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(user=self.request.user)
+
+    @action(detail=False, methods=['GET', 'PATCH'])
+    def me(self, request):
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        if request.method == 'PATCH':
+            serializer = self.get_serializer(profile, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+
 class BudgetViewSet(viewsets.ModelViewSet):
     serializer_class = BudgetSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -58,10 +98,15 @@ class FinanceSummaryViewSet(viewsets.ViewSet):
         
         balance = total_income - total_expense
         
+        # Get savings from profile
+        profile = UserProfile.objects.filter(user=user).first()
+        total_savings = profile.Savings if profile else 0
+        
         return Response({
             'total_income': total_income,
             'total_expense': total_expense,
-            'balance': balance
+            'balance': balance,
+            'total_savings': total_savings
         })
 
 @api_view(['POST'])

@@ -8,27 +8,33 @@ import {
   Edit2,
   Calendar,
   Tag,
+  Receipt,
   ArrowUpRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../context/ToastContext';
+import { TableRowSkeleton } from '../components/SkeletonLoader';
 
 const Expenses = () => {
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+    const { addToast } = useToast();
 
     useEffect(() => {
         fetchExpenses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchExpenses = async () => {
         try {
             const res = await api.get('expenses/');
             setExpenses(res.data);
-        } catch (err) {
+        } catch (_err) {
             console.error('Error fetching expenses');
+            addToast('Failed to load expenses', 'error');
         } finally {
             setLoading(false);
         }
@@ -38,27 +44,16 @@ const Expenses = () => {
         if (window.confirm('Delete this transaction?')) {
             try {
                 await api.delete(`expenses/${id}/`);
-                setExpenses(expenses.filter(e => e.id !== id));
+                setExpenses(prev => prev.filter(e => e.id !== id));
+                addToast('Transaction deleted', 'success');
             } catch (err) {
-                alert('Failed to delete');
+                addToast('Failed to delete transaction', 'error');
             }
         }
     };
-
     const filteredExpenses = expenses.filter(e => 
         e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (loading) return (
-        <div style={{ padding: '80px', textAlign: 'center' }}>
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                style={{ width: '40px', height: '40px', border: '4px solid var(--primary-soft)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 16px' }}
-            />
-            <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Retrieving your records...</p>
-        </div>
     );
 
     const containerVariants = {
@@ -143,73 +138,76 @@ const Expenses = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {filteredExpenses.map((exp) => (
-                    <motion.div 
-                        key={exp.id} 
-                        variants={itemVariants}
-                        whileHover={{ x: 4 }}
-                        style={{ 
-                            background: 'white', 
-                            padding: '20px 24px', 
-                            borderRadius: 'var(--radius-lg)', 
-                            boxShadow: 'var(--shadow-sm)',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            border: '1px solid rgba(0,0,0,0.02)'
-                        }}
-                    >
-                        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                            <div style={{ 
-                                width: '56px', 
-                                height: '56px', 
-                                background: 'var(--danger-soft)', 
-                                color: 'var(--danger)',
-                                borderRadius: '18px', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyHeight: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <Receipt size={24} />
-                            </div>
-                            <div>
-                                <h4 style={{ fontWeight: '800', fontSize: '17px', marginBottom: '6px' }}>{exp.title}</h4>
-                                <div style={{ display: 'flex', gap: '16px', color: 'var(--text-muted)', fontSize: '13px', fontWeight: '600' }}>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Tag size={14} /> {exp.category_name}
-                                    </span>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Calendar size={14} /> {exp.date}
-                                    </span>
+                <AnimatePresence mode="popLayout">
+                    {filteredExpenses.map((exp) => (
+                        <motion.div 
+                            key={exp.id} 
+                            layout
+                            variants={itemVariants}
+                            exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                            whileHover={{ x: 4 }}
+                            style={{ 
+                                background: 'white', 
+                                padding: '20px 24px', 
+                                borderRadius: 'var(--radius-lg)', 
+                                boxShadow: 'var(--shadow-sm)',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                border: '1px solid rgba(0,0,0,0.02)'
+                            }}
+                        >
+                            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                                <div style={{ 
+                                    width: '56px', 
+                                    height: '56px', 
+                                    background: 'var(--danger-soft)', 
+                                    color: 'var(--danger)',
+                                    borderRadius: '18px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center'
+                                }}>
+                                    <Receipt size={24} />
+                                </div>
+                                <div>
+                                    <h4 style={{ fontWeight: '800', fontSize: '17px', marginBottom: '6px' }}>{exp.title}</h4>
+                                    <div style={{ display: 'flex', gap: '16px', color: 'var(--text-muted)', fontSize: '13px', fontWeight: '600' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Tag size={14} /> {exp.category_name}
+                                        </span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Calendar size={14} /> {exp.date}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ fontWeight: '900', color: 'var(--danger)', fontSize: '20px', letterSpacing: '-0.5px' }}>-${exp.amount.toFixed(2)}</p>
-                                <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>{exp.payment_method}</p>
-                            </div>
                             
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <motion.button 
-                                    whileHover={{ scale: 1.1, background: '#F9F9FB' }}
-                                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}
-                                >
-                                    <Edit2 size={16} />
-                                </motion.button>
-                                <motion.button 
-                                    whileHover={{ scale: 1.1, background: 'var(--danger-soft)', color: 'var(--danger)' }}
-                                    onClick={() => handleDelete(exp.id)}
-                                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}
-                                >
-                                    <Trash2 size={16} />
-                                </motion.button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                                <div style={{ textAlign: 'right' }}>
+                                    <p style={{ fontWeight: '900', color: 'var(--danger)', fontSize: '20px', letterSpacing: '-0.5px' }}>-${exp.amount.toFixed(2)}</p>
+                                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>{exp.payment_method}</p>
+                                </div>
+                                
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1, background: '#F9F9FB' }}
+                                        style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                    >
+                                        <Edit2 size={16} />
+                                    </motion.button>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1, background: 'var(--danger-soft)', color: 'var(--danger)' }}
+                                        onClick={() => handleDelete(exp.id)}
+                                        style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}
+                                    >
+                                        <Trash2 size={16} />
+                                    </motion.button>
+                                </div>
                             </div>
-                        </div>
-                    </motion.div>
-                ))}
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
 
             {filteredExpenses.length === 0 && (

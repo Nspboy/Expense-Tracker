@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, 
   Shield, 
@@ -14,12 +14,41 @@ import {
   Lock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { motion } from 'framer-motion';
+import api from '../api/client';
 
 const Settings = () => {
     const { user, handleLogout } = useAuth();
-    const [theme, setTheme] = useState('light');
-    const [currency, setCurrency] = useState('USD');
+    const { addToast } = useToast();
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get('profile/me/');
+                setProfile(res.data);
+            } catch (_err) {
+                console.error('Failed to fetch profile');
+                addToast('Failed to load settings', 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
+
+    const updateProfile = async (updates) => {
+        try {
+            const res = await api.patch('profile/me/', updates);
+            setProfile(res.data);
+            addToast('Settings updated successfully', 'success');
+        } catch (_err) {
+            console.error('Failed to update profile');
+            addToast('Failed to update settings', 'error');
+        }
+    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -33,6 +62,8 @@ const Settings = () => {
         hidden: { y: 20, opacity: 0 },
         visible: { y: 0, opacity: 1 }
     };
+
+    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading setttings...</div>;
 
     return (
         <motion.div 
@@ -71,7 +102,7 @@ const Settings = () => {
                         </div>
                         <div>
                             <h3 style={{ fontSize: '22px', fontWeight: '900' }}>{user?.username || 'User Profile'}</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>Personal Account • Premium Member</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>{profile?.profession || 'Member'}</p>
                         </div>
                         <motion.button 
                             whileHover={{ y: -2 }}
@@ -109,8 +140,8 @@ const Settings = () => {
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0', borderBottom: '1px solid #F2F2F7' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ padding: '10px', background: theme === 'dark' ? 'var(--primary-soft)' : '#F2F2F7', borderRadius: '10px' }}>
-                                {theme === 'dark' ? <Moon size={20} color="var(--primary)" /> : <Sun size={20} color="var(--text-muted)" />}
+                            <div style={{ padding: '10px', background: profile?.theme === 'dark' ? 'var(--primary-soft)' : '#F2F2F7', borderRadius: '10px' }}>
+                                {profile?.theme === 'dark' ? <Moon size={20} color="var(--primary)" /> : <Sun size={20} color="var(--text-muted)" />}
                             </div>
                             <div>
                                 <p style={{ fontWeight: '700', fontSize: '15px' }}>Interface Theme</p>
@@ -118,15 +149,15 @@ const Settings = () => {
                             </div>
                         </div>
                         <button 
-                            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                            onClick={() => updateProfile({ theme: profile?.theme === 'light' ? 'dark' : 'light' })}
                             style={{ 
-                                width: '56px', hieght: '32px', borderRadius: '16px', border: 'none', cursor: 'pointer',
-                                background: theme === 'dark' ? 'var(--primary)' : '#E9E9EA',
+                                width: '56px', borderRadius: '16px', border: 'none', cursor: 'pointer',
+                                background: profile?.theme === 'dark' ? 'var(--primary)' : '#E9E9EA',
                                 position: 'relative', height: '32px', transition: 'background 0.3s'
                             }}
                         >
                             <motion.div 
-                                animate={{ x: theme === 'dark' ? 26 : 4 }}
+                                animate={{ x: profile?.theme === 'dark' ? 26 : 4 }}
                                 style={{ 
                                     width: '24px', height: '24px', borderRadius: '50%', background: 'white',
                                     position: 'absolute', top: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -146,8 +177,8 @@ const Settings = () => {
                             </div>
                         </div>
                         <select 
-                            value={currency} 
-                            onChange={(e) => setCurrency(e.target.value)}
+                            value={profile?.currency || 'USD'} 
+                            onChange={(e) => updateProfile({ currency: e.target.value })}
                             style={{ 
                                 padding: '10px 16px', 
                                 borderRadius: '12px', 
