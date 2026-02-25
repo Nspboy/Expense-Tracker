@@ -1,5 +1,5 @@
 :root {
-  /* FinSet Design Tokens */
+  /* Expense Tracker Design Tokens */
   --primary: #5E5CE6;
   --primary-soft: rgba(94, 92, 230, 0.1);
   --success: #34C759;
@@ -15,7 +15,7 @@
   --text-muted: #8E8E93;
   --border: #E5E5EA;
   
-  /* FinSet Aesthetics */
+  /* Expense Tracker Aesthetics */
   --radius-xl: 32px;
   --radius-lg: 24px;
   --radius-md: 16px;

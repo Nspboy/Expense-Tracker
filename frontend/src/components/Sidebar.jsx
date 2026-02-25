@@ -58,10 +58,10 @@ const Sidebar = () => {
                     fontWeight: '900',
                     fontSize: '20px'
                 }}>
-                    F
+                    E
                 </div>
-                <h2 style={{ fontSize: '20px', fontWeight: '800', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
-                    FinSet
+                <h2 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+                    Expense <span style={{ color: 'var(--primary)' }}>Tracker</span>
                 </h2>
             </div>
 

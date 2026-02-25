@@ -27,7 +27,7 @@ const MainLayout = ({ children }) => {
                     marginBottom: '40px'
                 }}>
                     <div>
-                        <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '4px' }}>Welcome back, {user?.username || 'Adaline'}!</h1>
+                        <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '4px' }}>Welcome back, {user?.username || 'Nagaraj'}!</h1>
                         <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>It is the best time to manage your finances</p>
                     </div>
 
@@ -65,11 +65,11 @@ const MainLayout = ({ children }) => {
                                 color: 'var(--primary)',
                                 overflow: 'hidden'
                             }}>
-                                <img src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=5E5CE6&color=fff`} alt="avatar" style={{ width: '100%', height: '100%' }} />
+                                <img src={`https://ui-avatars.com/api/?name=${user?.username || 'Nagaraj'}&background=5E5CE6&color=fff`} alt="avatar" style={{ width: '100%', height: '100%' }} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontWeight: '800', fontSize: '13px' }}>{user?.username || 'Adaline Lively'}</span>
-                                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600' }}>{user?.email || 'adalineal@gmail.com'}</span>
+                                <span style={{ fontWeight: '800', fontSize: '13px' }}>{user?.username || 'Nagaraj'}</span>
+                                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600' }}>{user?.email || 'nagaraj@example.com'}</span>
                             </div>
                         </div>
                     </div>
