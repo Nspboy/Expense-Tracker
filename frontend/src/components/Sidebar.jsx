@@ -14,7 +14,7 @@ import {
   Moon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 const Sidebar = () => {
     const { handleLogout } = useAuth();
@@ -107,7 +107,7 @@ const Sidebar = () => {
                 }}>
                     <HelpCircle size={20} /> Help
                 </NavLink>
-                <motion.button 
+                <Motion.button 
                     whileTap={{ scale: 0.95 }}
                     onClick={handleLogout}
                     style={{
@@ -126,7 +126,7 @@ const Sidebar = () => {
                     }}
                 >
                     <LogOut size={20} /> Log out
-                </motion.button>
+                </Motion.button>
 
                 {/* Theme Toggle Pill */}
                 <div style={{ 
