@@ -2,11 +2,34 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/client';
 import { 
   BarChart3, 
-  Download, 
-  Calendar,
   FileSpreadsheet,
-  FileText
+  FileText,
+  Download,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight
 } from 'lucide-react';
+import { 
+  Chart as ChartJS, 
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title, 
+  Tooltip, 
+  Legend 
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { motion } from 'framer-motion';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Reports = () => {
     const [summary, setSummary] = useState({ total_income: 0, total_expense: 0, balance: 0 });
@@ -16,7 +39,7 @@ const Reports = () => {
         const fetchSummary = async () => {
             try {
                 const res = await api.get('summary/');
-                setSummary(res.data[0] || res.data); // FinanceSummaryViewSet list returns an object or array
+                setSummary(res.data[0] || res.data);
             } catch (err) {
                 console.error('Error fetching summary');
             } finally {
@@ -26,95 +49,144 @@ const Reports = () => {
         fetchSummary();
     }, []);
 
-    const exportToCSV = () => {
-        // Mock CSV export logic
-        const csvContent = "data:text/csv;charset=utf-8,Date,Source/Title,Amount,Type\n" 
-            + "2024-03-25,Salary,5000,Income\n"
-            + "2024-03-24,Rent,1200,Expense";
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "financial_report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const chartData = {
+        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+        datasets: [
+            {
+                label: 'Expenses',
+                data: [1200, 1900, 1500, 2100, 1400, 2200, 1800],
+                backgroundColor: 'rgba(94, 92, 230, 0.8)',
+                borderRadius: 8,
+                barThickness: 32,
+            },
+            {
+                label: 'Income',
+                data: [3000, 3200, 2800, 3500, 3100, 4000, 3800],
+                backgroundColor: 'rgba(52, 199, 89, 0.8)',
+                borderRadius: 8,
+                barThickness: 32,
+            }
+        ],
     };
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Generating financial reports...</div>;
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20,
+                    font: { family: 'Inter', weight: '600' }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'white',
+                titleColor: '#1C1C1E',
+                bodyColor: '#1C1C1E',
+                borderColor: '#E5E5EA',
+                borderWidth: 1,
+                padding: 12,
+                boxPadding: 8,
+                usePointStyle: true,
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                border: { display: false }
+            },
+            y: {
+                grid: { color: '#F2F2F7' },
+                border: { display: false }
+            }
+        }
+    };
+
+    if (loading) return (
+        <div style={{ padding: '80px', textAlign: 'center' }}>
+            <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                style={{ width: '40px', height: '40px', border: '4px solid var(--primary-soft)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 16px' }}
+            />
+            <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Compiling your reports...</p>
+        </div>
+    );
 
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ maxWidth: '1100px', margin: '0 auto' }}
+        >
+            <div className="dashboard-header" style={{ marginBottom: '40px' }}>
                 <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: '800' }}>Financial Reports</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Analyze your monthly performance and export data</p>
+                    <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '-1px' }}>Financial Reports</h1>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>Analyze performance and export raw data.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <button 
-                      onClick={exportToCSV}
-                      style={{ 
-                        padding: '10px 16px', 
-                        background: 'white', 
-                        border: '1px solid var(--border)', 
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                        fontWeight: '600'
-                    }}>
+                    <motion.button 
+                        whileHover={{ y: -2 }}
+                        className="btn" 
+                        style={{ width: 'auto', background: 'white', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', color: 'var(--text-main)', fontWeight: '700' }}
+                    >
                         <FileSpreadsheet size={18} /> Export CSV
-                    </button>
-                    <button style={{ 
-                        padding: '10px 16px', 
-                        background: 'white', 
-                        border: '1px solid var(--border)', 
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                        fontWeight: '600'
-                    }}>
-                        <FileText size={18} /> Export PDF
-                    </button>
+                    </motion.button>
+                    <motion.button 
+                        whileHover={{ y: -2 }}
+                        className="btn btn-primary" 
+                        style={{ width: 'auto' }}
+                    >
+                        <Download size={18} /> Download All
+                    </motion.button>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
-                <div style={{ background: 'white', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow)' }}>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '8px' }}>Total Income</p>
-                    <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--success)' }}>${summary.total_income.toLocaleString()}</h2>
-                </div>
-                <div style={{ background: 'white', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow)' }}>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '8px' }}>Total Expenses</p>
-                    <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--danger)' }}>${summary.total_expense.toLocaleString()}</h2>
-                </div>
-                <div style={{ background: 'white', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow)' }}>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '8px' }}>Net Savings</p>
-                    <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary)' }}>${summary.balance.toLocaleString()}</h2>
-                </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', marginBottom: '48px' }}>
+                {[
+                    { label: 'Total Income', value: summary.total_income, color: 'var(--success)', icon: <TrendingUp size={18} /> },
+                    { label: 'Total Expenses', value: summary.total_expense, color: 'var(--danger)', icon: <TrendingDown size={18} /> },
+                    { label: 'Net Savings', value: summary.balance, color: 'var(--primary)', icon: <ArrowUpRight size={18} /> },
+                ].map((item, i) => (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        key={i} 
+                        className="flux-card"
+                    >
+                        <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{item.label}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <h2 style={{ fontSize: '28px', fontWeight: '900', color: item.color }}>${item.value.toLocaleString()}</h2>
+                        </div>
+                    </motion.div>
+                ))}
             </div>
 
-            <div style={{ background: 'white', padding: '32px', borderRadius: '16px', boxShadow: 'var(--shadow)', textAlign: 'center' }}>
-                <BarChart3 size={48} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '16px' }} />
-                <h3>Monthly Trend Analysis</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Your spending increased by 12% compared to last month.</p>
-                <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '20px' }}>
-                    {[40, 60, 45, 80, 55, 90, 70].map((h, i) => (
-                        <div key={i} style={{ 
-                            width: '40px', 
-                            height: `${h}%`, 
-                            background: i === 5 ? 'var(--primary)' : '#E0E0E0', 
-                            borderRadius: '8px 8px 0 0' 
-                        }} />
-                    ))}
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flux-card" 
+                style={{ padding: '40px' }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                    <div>
+                        <h3 style={{ fontSize: '20px', fontWeight: '800' }}>Trend Comparison</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>Monthly income vs. expense flow</p>
+                    </div>
+                    <div style={{ background: '#F2F2F7', padding: '10px 16px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600' }}>
+                        <Calendar size={18} color="var(--text-muted)" /> Last 6 Months
+                    </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '12px', color: 'var(--text-muted)', fontSize: '12px' }}>
-                    {['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'].map(m => <span key={m} style={{ width: '40px' }}>{m}</span>)}
+                
+                <div style={{ height: '400px' }}>
+                    <Bar data={chartData} options={options} />
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

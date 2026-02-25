@@ -3,7 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import api from '../api/client';
-import { ArrowLeft, Save, Plus } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Save, 
+  DollarSign, 
+  Calendar, 
+  Tag, 
+  CreditCard, 
+  FileText,
+  ChevronDown
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AddTransaction = () => {
     const [type, setType] = useState('Expense');
@@ -46,7 +56,7 @@ const AddTransaction = () => {
             } else {
                 await api.post('income/', payload);
             }
-            navigate('/');
+            navigate(-1);
         } catch (err) {
             console.error('Failed to add transaction');
         } finally {
@@ -55,84 +65,135 @@ const AddTransaction = () => {
     };
 
     return (
-        <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
-            <button onClick={() => navigate(-1)} style={{ 
-                background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--text-muted)', marginBottom: '24px' 
-            }}>
-                <ArrowLeft size={20} /> Back
-            </button>
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={{ maxWidth: '640px', margin: '0 auto', padding: '0 20px' }}
+        >
+            <motion.button 
+                whileHover={{ x: -4 }}
+                onClick={() => navigate(-1)} 
+                style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px', 
+                    cursor: 'pointer', 
+                    color: 'var(--text-muted)', 
+                    marginBottom: '32px',
+                    fontWeight: '700',
+                    fontSize: '15px'
+                }}
+            >
+                <ArrowLeft size={20} /> Back to Overview
+            </motion.button>
 
-            <div className="auth-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <div>
-                        <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>Add Transaction</h2>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Log your financial activity</p>
-                    </div>
+            <div className="auth-card" style={{ maxWidth: 'none', padding: '48px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <h1 style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '-1px', marginBottom: '8px' }}>Add Transaction</h1>
+                    <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Record your financial movement</p>
                 </div>
 
-                <div style={{ display: 'flex', background: '#F2F4F7', padding: '4px', borderRadius: '10px', marginBottom: '24px' }}>
+                {/* Segmented Control */}
+                <div style={{ 
+                    display: 'flex', 
+                    background: '#F2F2F7', 
+                    padding: '6px', 
+                    borderRadius: '20px', 
+                    marginBottom: '40px',
+                    position: 'relative'
+                }}>
+                    <motion.div 
+                        initial={false}
+                        animate={{ x: type === 'Expense' ? 0 : '100%' }}
+                        style={{
+                            position: 'absolute',
+                            width: '49%',
+                            height: 'calc(100% - 12px)',
+                            background: 'white',
+                            borderRadius: '14px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                            zIndex: 0
+                        }}
+                    />
                     <button 
                         onClick={() => setType('Expense')}
                         style={{
-                            flex: 1, padding: '10px', border: 'none', borderRadius: '8px', cursor: 'pointer',
-                            background: type === 'Expense' ? 'white' : 'transparent',
-                            color: type === 'Expense' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: '600', transition: 'all 0.2s'
+                            flex: 1, padding: '14px', border: 'none', borderRadius: '14px', cursor: 'pointer',
+                            background: 'transparent',
+                            color: type === 'Expense' ? 'var(--text-main)' : 'var(--text-muted)',
+                            fontWeight: '700', fontSize: '15px', position: 'relative', zIndex: 1,
+                            transition: 'color 0.2s'
                         }}
                     >Expense</button>
                     <button 
                         onClick={() => setType('Income')}
                         style={{
-                            flex: 1, padding: '10px', border: 'none', borderRadius: '8px', cursor: 'pointer',
-                            background: type === 'Income' ? 'white' : 'transparent',
-                            color: type === 'Income' ? 'var(--primary)' : 'var(--text-muted)',
-                            fontWeight: '600', transition: 'all 0.2s'
+                            flex: 1, padding: '14px', border: 'none', borderRadius: '14px', cursor: 'pointer',
+                            background: 'transparent',
+                            color: type === 'Income' ? 'var(--text-main)' : 'var(--text-muted)',
+                            fontWeight: '700', fontSize: '15px', position: 'relative', zIndex: 1,
+                            transition: 'color 0.2s'
                         }}
                     >Income</button>
                 </div>
 
                 <form onSubmit={onSubmit}>
                     <div className="form-group">
-                        <label className="form-label">{type === 'Expense' ? 'Expense Title' : 'Income Source'}</label>
-                        <input 
-                            type="text" 
-                            className="form-input" 
-                            placeholder={type === 'Expense' ? 'e.g. Grocery Shopping' : 'e.g. Freelance Pay'}
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            required
-                        />
+                        <label className="form-label">{type === 'Expense' ? 'Transaction Name' : 'Income Source'}</label>
+                        <div style={{ position: 'relative' }}>
+                            <Tag style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-muted)' }} size={20} />
+                            <input 
+                                type="text" 
+                                className="form-input" 
+                                style={{ paddingLeft: '48px' }}
+                                placeholder={type === 'Expense' ? 'e.g. Starbucks Coffee' : 'e.g. Monthly Salary'}
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                required
+                            />
+                        </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                         <div className="form-group">
                             <label className="form-label">Amount ($)</label>
-                            <input 
-                                type="number" 
-                                className="form-input" 
-                                value={formData.amount}
-                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                required
-                                step="0.01"
-                            />
+                            <div style={{ position: 'relative' }}>
+                                <DollarSign style={{ position: 'absolute', left: '16px', top: '16px', color: type === 'Expense' ? 'var(--danger)' : 'var(--success)' }} size={20} />
+                                <input 
+                                    type="number" 
+                                    className="form-input" 
+                                    style={{ paddingLeft: '48px', fontWeight: '800', fontSize: '18px' }}
+                                    value={formData.amount}
+                                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                    required
+                                    step="0.01"
+                                />
+                            </div>
                         </div>
                         <div className="form-group">
                             <label className="form-label">Date</label>
-                            <DatePicker 
-                                selected={formData.date} 
-                                onChange={(date) => setFormData({ ...formData, date: date })}
-                                className="form-input"
-                                dateFormat="yyyy-MM-dd"
-                            />
+                            <div style={{ position: 'relative' }}>
+                                <Calendar style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-muted)', zIndex: 10 }} size={20} />
+                                <DatePicker 
+                                    selected={formData.date} 
+                                    onChange={(date) => setFormData({ ...formData, date: date })}
+                                    className="form-input"
+                                    style={{ paddingLeft: '48px' }}
+                                    dateFormat="MMMM d, yyyy"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    {type === 'Expense' && (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div className="form-group">
-                                <label className="form-label">Category</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Category</label>
+                            <div style={{ position: 'relative' }}>
                                 <select 
                                     className="form-input"
+                                    style={{ appearance: 'none' }}
                                     value={formData.category}
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     required
@@ -140,39 +201,65 @@ const AddTransaction = () => {
                                     <option value="">Select Category</option>
                                     {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                                 </select>
+                                <ChevronDown style={{ position: 'absolute', right: '16px', top: '16px', pointerEvents: 'none', color: 'var(--text-muted)' }} size={20} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Payment Method</label>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Method</label>
+                            <div style={{ position: 'relative' }}>
+                                <CreditCard style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-muted)' }} size={20} />
                                 <select 
                                     className="form-input"
+                                    style={{ paddingLeft: '48px', appearance: 'none' }}
                                     value={formData.payment_method}
                                     onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
                                 >
-                                    <option value="Cash">Cash</option>
-                                    <option value="Card">Card</option>
-                                    <option value="Bank Transfer">Bank Transfer</option>
-                                    <option value="UPI">UPI / Google Pay</option>
+                                    <option value="Cash">💵 Cash</option>
+                                    <option value="Card">💳 Card</option>
+                                    <option value="Bank Transfer">🏦 Bank</option>
+                                    <option value="UPI">📱 UPI / GPAY</option>
                                 </select>
+                                <ChevronDown style={{ position: 'absolute', right: '16px', top: '16px', pointerEvents: 'none', color: 'var(--text-muted)' }} size={20} />
                             </div>
                         </div>
-                    )}
-
-                    <div className="form-group">
-                        <label className="form-label">Notes (Optional)</label>
-                        <textarea 
-                            className="form-input" 
-                            style={{ height: '80px', paddingTop: '10px' }}
-                            value={formData.notes}
-                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        />
                     </div>
 
-                    <button type="submit" className="btn btn-primary" disabled={loading} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
-                        <Save size={18} /> {loading ? 'Saving...' : `Save ${type}`}
-                    </button>
+                    <div className="form-group">
+                        <label className="form-label">Notes</label>
+                        <div style={{ position: 'relative' }}>
+                            <FileText style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-muted)' }} size={20} />
+                            <textarea 
+                                className="form-input" 
+                                style={{ height: '100px', paddingTop: '16px', paddingLeft: '48px', resize: 'none' }}
+                                placeholder="Describe the transaction for future reference..."
+                                value={formData.notes}
+                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <motion.button 
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        type="submit" 
+                        className="btn btn-primary" 
+                        disabled={loading} 
+                        style={{ 
+                            background: type === 'Expense' ? 'var(--primary)' : 'var(--success)',
+                            boxShadow: type === 'Expense' ? '0 8px 20px rgba(94, 92, 230, 0.3)' : '0 8px 20px rgba(52, 199, 89, 0.3)',
+                            marginTop: '24px',
+                            height: '60px'
+                        }}
+                    >
+                        {loading ? 'Processing...' : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Save size={20} /> Confirm {type}
+                            </div>
+                        )}
+                    </motion.button>
                 </form>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
