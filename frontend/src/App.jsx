@@ -13,6 +13,8 @@ import Income from './pages/Income';
 import Budgets from './pages/Budgets';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Wallet from './pages/Wallet';
+import Goals from './pages/Goals';
 
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout children={<Outlet />} />}>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/wallet" element={<Wallet />} />
+              <Route path="/goals" element={<Goals />} />
               <Route path="/add-transaction" element={<AddTransaction />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/expenses" element={<Expenses />} />

@@ -1,16 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/client';
 import { 
-  Wallet, 
+  ArrowUpRight, 
   TrendingUp, 
   TrendingDown, 
-  Plus, 
-  ArrowUpRight, 
-  Clock,
-  LayoutDashboard
+  Search,
+  MoreVertical,
+  ChevronRight,
+  Youtube,
+  Cloud,
+  Coffee,
+  Car,
+  Home as HomeIcon,
+  Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { 
+    Chart as ChartJS, 
+    CategoryScale, 
+    LinearScale, 
+    BarElement, 
+    Title, 
+    Tooltip, 
+    Legend, 
+    ArcElement 
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement
+);
 
 const Dashboard = () => {
     const [summary, setSummary] = useState({ balance: 0, total_income: 0, total_expense: 0 });
@@ -26,7 +52,7 @@ const Dashboard = () => {
                     api.get('expenses/')
                 ]);
                 setSummary(sumRes.data);
-                setRecentExpenses(expRes.data.slice(0, 5));
+                setRecentExpenses(expRes.data.slice(0, 3));
             } catch (err) {
                 console.error('Failed to fetch dashboard data');
             } finally {
@@ -36,121 +62,230 @@ const Dashboard = () => {
         fetchData();
     }, []);
 
-    if (loading) return (
-        <div style={{ padding: '80px', textAlign: 'center' }}>
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                style={{ width: '40px', height: '40px', border: '4px solid var(--primary-soft)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 16px' }}
-            />
-            <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Structuring your finances...</p>
-        </div>
-    );
-
     const stats = [
-        { label: 'Total Salary', value: summary.total_income, icon: <Wallet />, color: 'var(--primary)', bg: 'var(--primary-soft)' },
-        { label: 'Total Expense', value: summary.total_expense, icon: <TrendingDown />, color: 'var(--danger)', bg: 'var(--danger-soft)' },
-        { label: 'Savings', value: summary.balance, icon: <TrendingUp />, color: 'var(--success)', bg: 'var(--success-soft)' },
-        { label: 'Monthly Goal', value: 400.00, icon: <LayoutDashboard />, color: 'var(--warning)', bg: 'rgba(255, 149, 0, 0.1)' },
+        { label: 'Total balance', value: summary.balance, trend: '+12.1%', isUp: true },
+        { label: 'Income', value: summary.total_income, trend: '+6.1%', isUp: true },
+        { label: 'Expense', value: summary.total_expense, trend: '-2.4%', isUp: false },
+        { label: 'Total savings', value: 32913.00, trend: '+12.1%', isUp: true },
     ];
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
+    const moneyFlowData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Income',
+                data: [10000, 11000, 10500, 13000, 12000, 11000, 10000],
+                backgroundColor: '#5E5CE6',
+                borderRadius: 4,
+                barThickness: 12,
+            },
+            {
+                label: 'Expense',
+                data: [7000, 8000, 10000, 9000, 8500, 7000, 6000],
+                backgroundColor: '#D1CFFE',
+                borderRadius: 4,
+                barThickness: 12,
+            },
+        ],
     };
 
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { y: 0, opacity: 1 }
+    const budgetData = {
+        labels: ['Cafe', 'Entertainment', 'Investments', 'Food', 'Health', 'Traveling'],
+        datasets: [
+            {
+                data: [15, 10, 20, 30, 10, 15],
+                backgroundColor: [
+                    '#5E5CE6', '#7B79FF', '#A3A1FF', '#C7C6FF', '#E1E0FF', '#F2F2F7'
+                ],
+                borderWidth: 0,
+                cutout: '75%',
+            },
+        ],
     };
+
+    if (loading) return null;
 
     return (
         <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
         >
-            <div className="dashboard-header">
-                <div>
-                    <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '-0.5px' }}>Expense Tracker</h1>
-                    <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>Analyze your financial growth.</p>
-                </div>
-                <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/add-transaction')} 
-                    className="btn btn-primary" 
-                    style={{ width: 'auto' }}
-                >
-                    <Plus size={20} /> Add Income
-                </motion.button>
-            </div>
-
+            {/* Top Stat Cards */}
             <div className="flux-grid">
                 {stats.map((stat, idx) => (
                     <motion.div 
                         key={idx} 
-                        variants={itemVariants}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
                         className="flux-card"
                     >
-                        <div className="flux-card-icon" style={{ background: stat.bg, color: stat.color }}>
-                            {stat.icon}
+                        <div className="flux-card-header">
+                            <span className="flux-card-label" style={{ fontSize: '13px', textTransform: 'none' }}>{stat.label}</span>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <ArrowUpRight size={16} color="var(--text-main)" />
+                            </div>
                         </div>
-                        <p className="flux-card-label">{stat.label}</p>
-                        <h2 className="flux-card-value">${stat.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
+                        <h2 className="stat-value">${stat.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
+                        <div style={{ marginTop: '16px' }}>
+                            <span className={`trend-badge ${stat.isUp ? 'trend-up' : 'trend-down'}`}>
+                                {stat.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                {stat.trend}
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '12px', marginLeft: '8px', fontWeight: '600' }}>vs last month</span>
+                        </div>
                     </motion.div>
                 ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '32px', marginTop: '16px' }}>
-                <motion.div variants={itemVariants} className="flux-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h3 style={{ fontSize: '20px', fontWeight: '700' }}>Latest Entries</h3>
-                        <motion.button 
-                            whileHover={{ x: 5 }}
-                            onClick={() => navigate('/expenses')}
-                            style={{ color: 'var(--primary)', background: 'none', border: 'none', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        >
-                            See All <ArrowUpRight size={18} />
-                        </motion.button>
+            {/* Middle Row: Money Flow & Budget */}
+            <div style={{ display: 'grid', gridTemplateColumns: '6.5fr 3.5fr', gap: '24px' }}>
+                {/* Money Flow */}
+                <div className="flux-card">
+                    <div className="flux-card-header" style={{ marginBottom: '32px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800' }}>Money flow</h3>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#5E5CE6' }} /> Income
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D1CFFE' }} /> Expense
+                            </div>
+                            <select style={{ border: 'none', background: '#F2F2F7', padding: '4px 8px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>
+                                <option>All accounts</option>
+                            </select>
+                        </div>
                     </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {recentExpenses.map((exp) => (
-                            <div key={exp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderRadius: '16px', background: '#F9F9FB' }}>
-                                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                                    <div style={{ width: '48px', height: '48px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
-                                        <Clock size={20} color="var(--text-muted)" />
-                                    </div>
-                                    <div>
-                                        <p style={{ fontWeight: '700', fontSize: '15px' }}>{exp.title}</p>
-                                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500' }}>{exp.category_name} • {exp.date}</p>
-                                    </div>
-                                </div>
-                                <p style={{ fontWeight: '800', color: 'var(--danger)', fontSize: '16px' }}>-${exp.amount}</p>
+                    <div style={{ height: '300px' }}>
+                        <Bar 
+                            data={moneyFlowData} 
+                            options={{ 
+                                responsive: true, 
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { 
+                                    x: { grid: { display: false }, border: { display: false } },
+                                    y: { grid: { color: '#F2F2F7' }, border: { display: false }, ticks: { stepSize: 5000 } }
+                                }
+                            }} 
+                        />
+                    </div>
+                </div>
+
+                {/* Budget Donut */}
+                <div className="flux-card">
+                    <div className="flux-card-header" style={{ marginBottom: '16px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800' }}>Budget</h3>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ArrowUpRight size={16} />
+                        </div>
+                    </div>
+                    <div style={{ position: 'relative', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Doughnut 
+                            data={budgetData}
+                            options={{ plugins: { legend: { display: false } }, cutout: '75%' }}
+                        />
+                        <div style={{ position: 'absolute', textAlign: 'center' }}>
+                            <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Total for month</p>
+                            <h3 style={{ fontSize: '24px', fontWeight: '900' }}>$5,950</h3>
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '24px' }}>
+                        {['Cafe', 'Entertainment', 'Food', 'Travel'].map((cat, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: budgetData.datasets[0].backgroundColor[i] }} /> {cat}
                             </div>
                         ))}
                     </div>
-                </motion.div>
+                </div>
+            </div>
 
-                <motion.div variants={itemVariants} className="flux-card" style={{ background: 'var(--primary)', color: 'white' }}>
-                    <div style={{ marginBottom: '32px' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.2)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-                            <TrendingUp size={24} />
+            {/* Bottom Row: Transactions & Goals */}
+            <div style={{ display: 'grid', gridTemplateColumns: '6.5fr 3.5fr', gap: '24px' }}>
+                {/* Recent Transactions */}
+                <div className="flux-card">
+                    <div className="flux-card-header" style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800' }}>Recent transactions</h3>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <select style={{ border: 'none', background: '#F2F2F7', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' }}>
+                                <option>All accounts</option>
+                            </select>
+                            <button onClick={() => navigate('/expenses')} style={{ border: 'none', background: '#F2F2F7', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>See all</button>
                         </div>
-                        <h3 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '12px' }}>Current Savings</h3>
-                        <div style={{ fontSize: '40px', fontWeight: '900' }}>${summary.balance.toLocaleString()}</div>
                     </div>
-                    
-                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '20px' }}>
-                        <p style={{ fontSize: '14px', fontWeight: '500', opacity: 0.9, marginBottom: '8px' }}>Pro Tip</p>
-                        <p style={{ fontSize: '13px', lineHeight: '1.5', opacity: 0.8 }}>You're on track to hit your savings goal this month. Keep it up!</p>
+                    <table className="flux-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Payment Name</th>
+                                <th>Method</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentExpenses.length > 0 ? recentExpenses.map((exp) => (
+                                <tr key={exp.id}>
+                                    <td style={{ fontSize: '13px', fontWeight: '600' }}>{new Date(exp.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</td>
+                                    <td style={{ fontSize: '13px', fontWeight: '800', color: 'var(--danger-text)' }}>-${exp.amount}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ width: '28px', height: '28px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                                                {exp.title.toLowerCase().includes('youtube') ? <Youtube size={16} color="#FF0000" /> : <Cloud size={16} color="var(--primary)" />}
+                                            </div>
+                                            <span style={{ fontSize: '13px', fontWeight: '700' }}>{exp.title}</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>Mastercard **{Math.floor(Math.random() * 9000) + 1000}</td>
+                                    <td>
+                                        <span style={{ fontSize: '13px', fontWeight: '700' }}>{exp.category_name}</span>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>No recent transactions</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Saving Goals */}
+                <div className="flux-card">
+                    <div className="flux-card-header" style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800' }}>Saving goals</h3>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ArrowUpRight size={16} />
+                        </div>
                     </div>
-                </motion.div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        {[
+                            { label: 'MacBook Pro', current: 412, target: 1650, progress: 25 },
+                            { label: 'New car', current: 25200, target: 60000, progress: 42 },
+                            { label: 'New house', current: 4500, target: 150000, progress: 3 },
+                        ].map((goal, i) => (
+                            <div key={i}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: '700' }}>{goal.label}</span>
+                                    <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)' }}>${goal.target.toLocaleString()}</span>
+                                </div>
+                                <div style={{ width: '100%', height: '14px', background: '#F2F2F7', borderRadius: '10px', overflow: 'hidden' }}>
+                                    <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${goal.progress}%` }}
+                                        transition={{ duration: 1, ease: 'easeOut' }}
+                                        style={{ height: '100%', background: 'var(--primary)', borderRadius: '10px' }}
+                                    />
+                                </div>
+                                <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--primary)', marginTop: '6px' }}>{goal.progress}%</p>
+                            </div>
+                        ))}
+                        <button style={{ marginTop: '12px', padding: '12px', borderRadius: '16px', border: '2px dashed var(--border)', background: 'transparent', color: 'var(--text-muted)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <Plus size={16} /> Add new goal
+                        </button>
+                    </div>
+                </div>
             </div>
         </motion.div>
     );

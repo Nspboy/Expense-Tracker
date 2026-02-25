@@ -1,35 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Receipt, 
-  TrendingUp, 
+  Wallet,
+  Target,
   PieChart, 
   BarChart3, 
   Settings, 
-  LogOut 
+  HelpCircle,
+  LogOut,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 
 const Sidebar = () => {
     const { handleLogout } = useAuth();
+    const [isDark, setIsDark] = useState(false);
 
     const navItems = [
-        { icon: <LayoutDashboard size={22} />, label: 'Overview', path: '/' },
-        { icon: <Receipt size={22} />, label: 'Expenses', path: '/expenses' },
-        { icon: <TrendingUp size={22} />, label: 'Income', path: '/income' },
-        { icon: <PieChart size={22} />, label: 'Budgets', path: '/budgets' },
-        { icon: <BarChart3 size={22} />, label: 'Reports', path: '/reports' },
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/' },
+        { icon: <Receipt size={20} />, label: 'Transactions', path: '/expenses' },
+        { icon: <Wallet size={20} />, label: 'Wallet', path: '/wallet' },
+        { icon: <Target size={20} />, label: 'Goals', path: '/goals' },
+        { icon: <PieChart size={20} />, label: 'Budget', path: '/budgets' },
+        { icon: <BarChart3 size={20} />, label: 'Analytics', path: '/analytics' },
+        { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
     ];
 
     return (
         <aside style={{
-            width: '280px',
+            width: '260px',
             background: 'white',
             borderRight: '1px solid var(--border)',
             height: '100vh',
-            padding: '40px 24px',
+            padding: '32px 20px',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
@@ -37,25 +44,29 @@ const Sidebar = () => {
             top: 0,
             zIndex: 100
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '48px', paddingLeft: '8px' }}>
+            {/* Logo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px', paddingLeft: '8px' }}>
                 <div style={{ 
-                    background: 'var(--primary)', 
-                    width: '44px', 
-                    height: '44px', 
-                    borderRadius: '14px', 
+                    background: '#1C1C1E', 
+                    width: '40px', 
+                    height: '40px', 
+                    borderRadius: '50%', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(94, 92, 230, 0.3)'
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: '20px'
                 }}>
-                    <TrendingUp size={24} color="white" />
+                    F
                 </div>
-                <h2 style={{ fontSize: '22px', fontWeight: '900', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
-                    Expense <span style={{ color: 'var(--primary)' }}>Tracker</span>
+                <h2 style={{ fontSize: '20px', fontWeight: '800', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+                    FinSet
                 </h2>
             </div>
 
-            <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* Main Nav */}
+            <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {navItems.map((item) => (
                     <NavLink
                         key={item.label}
@@ -63,15 +74,16 @@ const Sidebar = () => {
                         style={({ isActive }) => ({
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '14px',
-                            padding: '14px 18px',
-                            borderRadius: 'var(--radius-md)',
+                            gap: '12px',
+                            padding: '12px 16px',
+                            borderRadius: '16px',
                             textDecoration: 'none',
-                            color: isActive ? 'var(--primary)' : 'var(--text-muted)',
-                            background: isActive ? 'var(--primary-soft)' : 'transparent',
-                            fontWeight: isActive ? '700' : '600',
-                            fontSize: '15px',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                            color: isActive ? 'white' : 'var(--text-main)',
+                            background: isActive ? 'var(--primary)' : 'transparent',
+                            fontWeight: isActive ? '700' : '500',
+                            fontSize: '14px',
+                            transition: 'all 0.2s ease',
+                            boxShadow: isActive ? '0 8px 16px rgba(94, 92, 230, 0.25)' : 'none'
                         })}
                     >
                         {item.icon}
@@ -80,41 +92,75 @@ const Sidebar = () => {
                 ))}
             </nav>
 
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '32px' }}>
-                <NavLink to="/settings" style={{
+            {/* Bottom Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: 'auto', paddingTop: '20px' }}>
+                <NavLink to="/help" style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '14px',
-                    padding: '14px 18px',
-                    borderRadius: 'var(--radius-md)',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
                     textDecoration: 'none',
-                    color: 'var(--text-muted)',
-                    fontWeight: '600',
-                    fontSize: '15px',
-                    marginBottom: '8px'
+                    color: 'var(--text-main)',
+                    fontWeight: '500',
+                    fontSize: '14px',
                 }}>
-                    <Settings size={22} /> Settings
+                    <HelpCircle size={20} /> Help
                 </NavLink>
                 <motion.button 
-                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleLogout}
                     style={{
-                        width: '100%',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '14px',
-                        padding: '14px 18px',
-                        borderRadius: 'var(--radius-md)',
+                        gap: '12px',
+                        padding: '12px 16px',
+                        borderRadius: '16px',
                         border: 'none',
                         background: 'transparent',
-                        color: 'var(--danger)',
+                        color: 'var(--text-main)',
                         cursor: 'pointer',
-                        fontSize: '15px',
-                        fontWeight: '700'
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        textAlign: 'left'
                     }}
                 >
-                    <LogOut size={22} /> Logout
+                    <LogOut size={20} /> Log out
                 </motion.button>
+
+                {/* Theme Toggle Pill */}
+                <div style={{ 
+                    marginTop: '24px',
+                    background: '#F2F2F7',
+                    padding: '4px',
+                    borderRadius: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                }}>
+                    <button 
+                        onClick={() => setIsDark(false)}
+                        style={{ 
+                            flex: 1, height: '32px', borderRadius: '20px', border: 'none',
+                            background: !isDark ? 'white' : 'transparent',
+                            boxShadow: !isDark ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}
+                    >
+                        <Sun size={16} color={!isDark ? 'var(--primary)' : 'var(--text-muted)'} />
+                    </button>
+                    <button 
+                        onClick={() => setIsDark(true)}
+                        style={{ 
+                            flex: 1, height: '32px', borderRadius: '20px', border: 'none',
+                            background: isDark ? 'white' : 'transparent',
+                            boxShadow: isDark ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}
+                    >
+                        <Moon size={16} color={isDark ? 'var(--primary)' : 'var(--text-muted)'} />
+                    </button>
+                </div>
             </div>
         </aside>
     );
