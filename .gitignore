@@ -1,0 +1,18 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+static/
+
+# Frontend
+node_modules/
+dist/
+.env
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.bak

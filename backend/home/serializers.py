@@ -1,0 +1,46 @@
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from .models import UserProfile, Category, Expense, Income, Budget, Reminder, Goal
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    class Meta:
+        model = UserProfile
+        fields = ['profession', 'Savings', 'income', 'currency', 'theme', 'user']
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+class ExpenseSerializer(serializers.ModelSerializer):
+    category_name = serializers.ReadOnlyField(source='category.name')
+    class Meta:
+        model = Expense
+        fields = '__all__'
+
+class IncomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Income
+        fields = '__all__'
+
+class BudgetSerializer(serializers.ModelSerializer):
+    category_name = serializers.ReadOnlyField(source='category.name')
+    consumed_amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Budget
+        fields = '__all__'
+
+    def get_consumed_amount(self, obj):
+        return Expense.objects.filter(
+            user=obj.user,
+            category=obj.category,
+            date__month=obj.month,
+            date__year=obj.year
+        ).aggregate(total=serializers.DecimalField(max_digits=12, decimal_places=2).to_internal_value(0))['total'] or 0
