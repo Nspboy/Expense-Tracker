@@ -1,204 +1,347 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  Shield, 
-  Bell, 
-  Globe, 
-  Moon, 
+import React, { useState, useEffect } from "react";
+import {
+  User,
+  Shield,
+  Bell,
+  Globe,
+  Moon,
   Sun,
   DollarSign,
   ChevronRight,
   LogOut,
   Camera,
   Mail,
-  Lock
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import { motion } from 'framer-motion';
-import api from '../api/client';
+  Lock,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import { motion } from "framer-motion";
 
 const Settings = () => {
-    const { user, handleLogout } = useAuth();
-    const { addToast } = useToast();
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const {
+    user,
+    profile,
+    theme,
+    toggleTheme,
+    updateProfile,
+    handleLogout,
+    fetchProfile,
+  } = useAuth();
+  const { addToast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await api.get('profile/me/');
-                setProfile(res.data);
-            } catch (_err) {
-                console.error('Failed to fetch profile');
-                addToast('Failed to load settings', 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProfile();
-    }, []);
+  // Internal state for forms
+  const [formData, setFormData] = useState({
+    email: "",
+    profession: "",
+    income: 0,
+    Savings: 0,
+    currency: "USD",
+  });
 
-    const updateProfile = async (updates) => {
-        try {
-            const res = await api.patch('profile/me/', updates);
-            setProfile(res.data);
-            addToast('Settings updated successfully', 'success');
-        } catch (_err) {
-            console.error('Failed to update profile');
-            addToast('Failed to update settings', 'error');
-        }
-    };
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        email: profile.user?.email || "",
+        profession: profile.profession || "",
+        income: profile.income || 0,
+        Savings: profile.Savings || 0,
+        currency: profile.currency || "USD",
+      });
+    }
+  }, [profile]);
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { y: 0, opacity: 1 }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        profession: formData.profession,
+        income: formData.income,
+        Savings: formData.Savings,
+        currency: formData.currency,
+        user: {
+          email: formData.email,
+        },
+      });
+      addToast("Profile updated successfully", "success");
+      await fetchProfile();
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to update profile", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading setttings...</div>;
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, staggerChildren: 0.1 },
+    },
+  };
 
-    return (
-        <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}
+  const sectionVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 },
+  };
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      style={{ padding: "40px", maxWidth: "1000px", margin: "0 auto" }}
+    >
+      <div className="dashboard-header" style={{ marginBottom: "48px" }}>
+        <div>
+          <h1
+            style={{
+              fontSize: "36px",
+              fontWeight: "900",
+              letterSpacing: "-1.5px",
+              marginBottom: "8px",
+            }}
+          >
+            Settings
+          </h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>
+            Personalize your experience and financial targets.
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: "16px" }}>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={toggleTheme}
+            className="btn"
+            style={{
+              width: "auto",
+              background: "var(--input-bg)",
+              color: "var(--text-main)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            {theme === "light" ? "Dark Mode" : "Light Mode"}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleLogout}
+            className="btn"
+            style={{
+              width: "auto",
+              background: "var(--danger-soft)",
+              color: "var(--danger)",
+            }}
+          >
+            <LogOut size={18} /> Log Out
+          </motion.button>
+        </div>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "32px",
+        }}
+      >
+        {/* Personal Information */}
+        <motion.div
+          variants={sectionVariants}
+          className="flux-card"
+          style={{ gridColumn: "span 1" }}
         >
-            <div className="dashboard-header" style={{ marginBottom: '40px' }}>
-                <div>
-                    <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '-1px' }}>Settings</h1>
-                    <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>Manage your workspace preferences.</p>
-                </div>
-                <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleLogout}
-                    className="btn" 
-                    style={{ width: 'auto', background: 'var(--danger-soft)', color: 'var(--danger)', border: 'none', fontWeight: '700' }}
-                >
-                    <LogOut size={18} /> Sign Out
-                </motion.button>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "24px",
+            }}
+          >
+            <div
+              style={{
+                padding: "8px",
+                background: "var(--primary-soft)",
+                borderRadius: "10px",
+                color: "var(--primary)",
+              }}
+            >
+              <User size={20} />
             </div>
+            <h2 style={{ fontSize: "18px", fontWeight: "800" }}>
+              Personal Info
+            </h2>
+          </div>
 
-            <div style={{ display: 'grid', gap: '32px' }}>
-                {/* Profile Section */}
-                <motion.section variants={itemVariants} className="flux-card" style={{ padding: '32px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '32px' }}>
-                        <div style={{ position: 'relative' }}>
-                            <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'var(--primary-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <User size={40} color="var(--primary)" />
-                            </div>
-                            <button style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: 'white', border: '1px solid var(--border)', borderRadius: '10px', padding: '6px', boxShadow: 'var(--shadow-sm)', cursor: 'pointer' }}>
-                                <Camera size={14} />
-                            </button>
-                        </div>
-                        <div>
-                            <h3 style={{ fontSize: '22px', fontWeight: '900' }}>{user?.username || 'User Profile'}</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>{profile?.profession || 'Member'}</p>
-                        </div>
-                        <motion.button 
-                            whileHover={{ y: -2 }}
-                            style={{ marginLeft: 'auto', padding: '10px 20px', borderRadius: '12px', border: '1px solid var(--border)', background: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: 'var(--shadow-sm)' }}
-                        >
-                            Edit Profile
-                        </motion.button>
-                    </div>
+          <div className="form-group">
+            <label className="form-label">Username</label>
+            <input
+              className="form-input"
+              value={user?.username || ""}
+              disabled
+              style={{ opacity: 0.6, cursor: "not-allowed" }}
+            />
+          </div>
 
-                    <div style={{ display: 'grid', gap: '12px' }}>
-                        {[
-                            { icon: <Mail size={18} />, label: 'Email Address', value: user?.email || 'Not set' },
-                            { icon: <Lock size={18} />, label: 'Security & Password', value: 'Last changed 2mo ago' },
-                            { icon: <Shield size={18} />, label: 'Two-Factor Auth', value: 'Enabled' },
-                        ].map((item, i) => (
-                            <motion.div 
-                                whileHover={{ background: '#F9F9FB' }}
-                                key={i} 
-                                style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', borderRadius: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
-                            >
-                                <div style={{ color: 'var(--text-muted)', background: 'white', padding: '10px', borderRadius: '10px', border: '1px solid var(--border)' }}>{item.icon}</div>
-                                <div style={{ flex: 1 }}>
-                                    <p style={{ fontWeight: '700', fontSize: '15px' }}>{item.label}</p>
-                                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500' }}>{item.value}</p>
-                                </div>
-                                <ChevronRight size={16} style={{ color: '#D0D5DD' }} />
-                            </motion.div>
-                        ))}
-                    </div>
-                </motion.section>
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input
+              name="email"
+              className="form-input"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="your@email.com"
+            />
+          </div>
 
-                {/* Preferences Section */}
-                <motion.section variants={itemVariants} className="flux-card" style={{ padding: '32px' }}>
-                    <h3 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '24px' }}>App Preferences</h3>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0', borderBottom: '1px solid #F2F2F7' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ padding: '10px', background: profile?.theme === 'dark' ? 'var(--primary-soft)' : '#F2F2F7', borderRadius: '10px' }}>
-                                {profile?.theme === 'dark' ? <Moon size={20} color="var(--primary)" /> : <Sun size={20} color="var(--text-muted)" />}
-                            </div>
-                            <div>
-                                <p style={{ fontWeight: '700', fontSize: '15px' }}>Interface Theme</p>
-                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>Toggle between light and dark mode</p>
-                            </div>
-                        </div>
-                        <button 
-                            onClick={() => updateProfile({ theme: profile?.theme === 'light' ? 'dark' : 'light' })}
-                            style={{ 
-                                width: '56px', borderRadius: '16px', border: 'none', cursor: 'pointer',
-                                background: profile?.theme === 'dark' ? 'var(--primary)' : '#E9E9EA',
-                                position: 'relative', height: '32px', transition: 'background 0.3s'
-                            }}
-                        >
-                            <motion.div 
-                                animate={{ x: profile?.theme === 'dark' ? 26 : 4 }}
-                                style={{ 
-                                    width: '24px', height: '24px', borderRadius: '50%', background: 'white',
-                                    position: 'absolute', top: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                }} 
-                            />
-                        </button>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                             <div style={{ padding: '10px', background: '#F2F2F7', borderRadius: '10px' }}>
-                                <DollarSign size={20} color="var(--text-muted)" />
-                            </div>
-                            <div>
-                                <p style={{ fontWeight: '700', fontSize: '15px' }}>Regional Currency</p>
-                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>Your default display currency</p>
-                            </div>
-                        </div>
-                        <select 
-                            value={profile?.currency || 'USD'} 
-                            onChange={(e) => updateProfile({ currency: e.target.value })}
-                            style={{ 
-                                padding: '10px 16px', 
-                                borderRadius: '12px', 
-                                border: '1px solid var(--border)', 
-                                background: '#F9F9FB', 
-                                fontWeight: '700',
-                                outline: 'none',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <option value="USD">USD ($)</option>
-                            <option value="EUR">EUR (€)</option>
-                            <option value="GBP">GBP (£)</option>
-                            <option value="INR">INR (₹)</option>
-                        </select>
-                    </div>
-                </motion.section>
-            </div>
+          <div className="form-group">
+            <label className="form-label">Profession</label>
+            <select
+              name="profession"
+              className="form-input"
+              value={formData.profession}
+              onChange={handleChange}
+            >
+              <option value="Employee">Employee</option>
+              <option value="Business">Business</option>
+              <option value="Student">Student</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </motion.div>
-    );
+
+        {/* Financial Targets */}
+        <motion.div
+          variants={sectionVariants}
+          className="flux-card"
+          style={{ gridColumn: "span 1" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "24px",
+            }}
+          >
+            <div
+              style={{
+                padding: "8px",
+                background: "var(--success-soft)",
+                borderRadius: "10px",
+                color: "var(--success-text)",
+              }}
+            >
+              <DollarSign size={20} />
+            </div>
+            <h2 style={{ fontSize: "18px", fontWeight: "800" }}>
+              Financial Goals
+            </h2>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Monthly Income Target</label>
+            <div style={{ position: "relative" }}>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontWeight: "700",
+                  color: "var(--text-muted)",
+                }}
+              >
+                $
+              </span>
+              <input
+                name="income"
+                className="form-input"
+                type="number"
+                value={formData.income}
+                onChange={handleChange}
+                style={{ paddingLeft: "32px" }}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Savings Target</label>
+            <div style={{ position: "relative" }}>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontWeight: "700",
+                  color: "var(--text-muted)",
+                }}
+              >
+                $
+              </span>
+              <input
+                name="Savings"
+                className="form-input"
+                type="number"
+                value={formData.Savings}
+                onChange={handleChange}
+                style={{ paddingLeft: "32px" }}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Default Currency</label>
+            <select
+              name="currency"
+              className="form-input"
+              value={formData.currency}
+              onChange={handleChange}
+            >
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
+          </div>
+        </motion.div>
+
+        <div
+          style={{
+            gridColumn: "span 2",
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "16px",
+          }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={isSaving}
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: "200px" }}
+          >
+            {isSaving ? "Saving Changes..." : "Save Settings"}
+          </motion.button>
+        </div>
+      </form>
+    </motion.div>
+  );
 };
 
 export default Settings;

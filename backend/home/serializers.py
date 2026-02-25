@@ -9,10 +9,22 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserSerializer(read_only=False)  # Allow updates to user fields
+
     class Meta:
         model = UserProfile
         fields = ['profession', 'Savings', 'income', 'currency', 'theme', 'user']
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            user = instance.user
+            user.email = user_data.get('email', user.email)
+            user.first_name = user_data.get('first_name', user.first_name)
+            user.last_name = user_data.get('last_name', user.last_name)
+            user.save()
+        
+        return super().update(instance, validated_data)
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
