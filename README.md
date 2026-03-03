@@ -38,7 +38,7 @@ This project follows industrial standards with a strict separation of concerns:
 2. Install dependencies: `npm install`.
 3. Start the dev server: `npm run dev`.
 
----
+---n
 
 ## 📁 Repository Structure
 

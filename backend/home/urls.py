@@ -5,6 +5,7 @@ from .api_views import (
     BudgetViewSet, FinanceSummaryViewSet, register_user,
     GoalViewSet, ReminderViewSet, UserProfileViewSet
 )
+from .views import home
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
@@ -18,6 +19,9 @@ router.register(r'profile', UserProfileViewSet, basename='profile')
 router.register(r'summary', FinanceSummaryViewSet, basename='summary')
 
 urlpatterns = [
+    # Root View
+    path('', home, name='home'),
+    
     # REST API Endpoints
     path('api/', include(router.urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
