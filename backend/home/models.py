@@ -6,34 +6,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db.models import Sum
 #Create your models here.
-SELECT_CATEGORY_CHOICES = [
-    ("Food","Food"),
-    ("Travel","Travel"),
-    ("Shopping","Shopping"),
-    ("Necessities","Necessities"),
-    ("Entertainment","Entertainment"),
-    ("Other","Other")
- ]
-ADD_EXPENSE_CHOICES = [
-     ("Expense","Expense"),
-     ("Income","Income")
- ]
 PROFESSION_CHOICES =[
     ("Employee","Employee"),
     ("Business","Business"),
     ("Student","Student"),
     ("Other","Other")
 ]
-class Addmoney_info(models.Model):
-    user = models.ForeignKey(User,default = 1, on_delete=models.CASCADE)
-    add_money = models.CharField(max_length = 10 , choices = ADD_EXPENSE_CHOICES )
-    quantity = models.BigIntegerField()
-    Date = models.DateField(default = now)
-    Category = models.CharField( max_length = 20, choices = SELECT_CATEGORY_CHOICES , default ='Food')
-    payment_method = models.CharField(max_length=20, choices=[('Google Pay', 'Google Pay'), ('Cash', 'Cash'), ('Paytm', 'Paytm'), ('Bank Transfer', 'Bank Transfer')], default='Cash')
-    vat_percentage = models.FloatField(default=0.0)
-    class Meta:
-        db_table = 'addmoney'
         
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -112,7 +90,7 @@ def check_budget_alert(sender, instance, created, **kwargs):
 class Reminder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    category = models.CharField(max_length=20, choices=SELECT_CATEGORY_CHOICES, default='Other')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     amount = models.BigIntegerField()
     date = models.DateField(default=now)
     frequency = models.CharField(max_length=20, choices=[('Daily', 'Daily'), ('Weekly', 'Weekly'), ('Monthly', 'Monthly')], default='Monthly')

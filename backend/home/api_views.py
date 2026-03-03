@@ -93,9 +93,6 @@ class FinanceSummaryViewSet(viewsets.ViewSet):
         total_income = Income.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
         total_expense = Expense.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Add legacy Addmoney_info if needed for backwards compatibility during migration
-        # total_income += Addmoney_info.objects.filter(user=user, add_money='Income').aggregate(Sum('quantity'))['quantity__sum'] or 0
-        
         balance = total_income - total_expense
         
         # Get savings from profile

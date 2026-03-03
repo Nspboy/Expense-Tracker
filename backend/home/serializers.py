@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=False)  # Allow updates to user fields
+    user = UserSerializer()  # Allow updates to user fields
 
     class Meta:
         model = UserProfile
@@ -57,6 +57,7 @@ class GoalSerializer(serializers.ModelSerializer):
         return min(int((obj.current_amount / obj.target_amount) * 100), 100)
 
 class ReminderSerializer(serializers.ModelSerializer):
+    category_name = serializers.ReadOnlyField(source='category.name')
     class Meta:
         model = Reminder
         fields = '__all__'
