@@ -52,7 +52,7 @@
     <strong style="color:var(--text-primary)">{{ incomes|length }}</strong> income record(s)
   </span>
   <span style="font-size:1rem; font-weight:700; color:var(--income-color)">
-    Total: +${{ total }}
+    Total: +{{ currency_symbol }}{{ total }}
   </span>
 </div>
 {% endif %}
@@ -77,7 +77,7 @@
             <td><strong style="color:var(--text-primary)">{{ inc.source }}</strong></td>
             <td class="text-muted-c text-sm">{{ inc.notes|default:"—"|truncatechars:50 }}</td>
             <td class="text-muted-c text-sm">{{ inc.date|date:"M j, Y" }}</td>
-            <td class="text-end amount-income">+${{ inc.amount }}</td>
+            <td class="text-end amount-income">+{{ currency_symbol }}{{ inc.amount }}</td>
             <td class="text-center">
               <div class="d-flex gap-2 justify-content-center">
                 <button class="btn-ghost btn-edit-income" data-id="{{ inc.id }}"

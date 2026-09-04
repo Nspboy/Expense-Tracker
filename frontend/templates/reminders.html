@@ -43,7 +43,7 @@
               </span>
               {% else %}—{% endif %}
             </td>
-            <td class="amount-expense">${{ rem.amount }}</td>
+            <td class="amount-expense">{{ currency_symbol }}{{ rem.amount }}</td>
             <td class="text-muted-c text-sm">{{ rem.date|date:"M j, Y" }}</td>
             <td>
               <span style="font-size:0.75rem; padding:3px 8px; border-radius:4px; background:var(--bg-input); color:var(--text-secondary)">

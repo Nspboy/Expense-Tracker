@@ -45,7 +45,7 @@ class Command(BaseCommand):
         if created:
             user1.set_password('Test@1234')
             user1.save()
-            UserProfile.objects.create(user=user1, profession='Employee', income=75000, Savings=15000, currency='USD')
+            UserProfile.objects.create(user=user1, profession='Employee', income=75000, Savings=15000, currency='INR')
             self.stdout.write(f"  Created user: testuser / Test@1234")
         else:
             self.stdout.write(f"  User testuser already exists")
@@ -57,7 +57,7 @@ class Command(BaseCommand):
         if created:
             user2.set_password('Demo@1234')
             user2.save()
-            UserProfile.objects.create(user=user2, profession='Business', income=120000, Savings=30000, currency='USD')
+            UserProfile.objects.create(user=user2, profession='Business', income=120000, Savings=30000, currency='INR')
             self.stdout.write(f"  Created user: demo / Demo@1234")
         else:
             self.stdout.write(f"  User demo already exists")

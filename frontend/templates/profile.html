@@ -76,12 +76,12 @@
 
           <div class="row g-3 mb-4">
             <div class="col-sm-6">
-              <label class="form-label" for="prof-income">Monthly Income ($)</label>
+              <label class="form-label" for="prof-income">Monthly Income ({{ currency_symbol }})</label>
               <input type="number" id="prof-income" name="income" class="form-control"
                      value="{{ profile.income }}" min="0">
             </div>
             <div class="col-sm-6">
-              <label class="form-label" for="prof-savings">Total Savings ($)</label>
+              <label class="form-label" for="prof-savings">Total Savings ({{ currency_symbol }})</label>
               <input type="number" id="prof-savings" name="savings" class="form-control"
                      value="{{ profile.Savings }}" min="0">
             </div>
@@ -122,12 +122,12 @@
           <hr class="divider my-0">
           <div class="d-flex align-items-center justify-content-between">
             <span class="text-muted-c text-sm">Monthly Income</span>
-            <span style="font-weight:700; color:var(--income-color)">${{ profile.income }}</span>
+            <span style="font-weight:700; color:var(--income-color)">{{ currency_symbol }}{{ profile.income }}</span>
           </div>
           <hr class="divider my-0">
           <div class="d-flex align-items-center justify-content-between">
             <span class="text-muted-c text-sm">Total Savings</span>
-            <span style="font-weight:700; color:var(--warning-color)">${{ profile.Savings }}</span>
+            <span style="font-weight:700; color:var(--warning-color)">{{ currency_symbol }}{{ profile.Savings }}</span>
           </div>
         </div>
       </div>

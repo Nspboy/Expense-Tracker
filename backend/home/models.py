@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     Savings = models.IntegerField(default=0, null=True, blank=True)
     income = models.BigIntegerField(default=0, null=True, blank=True)
     image = models.ImageField(upload_to='profile_pics', default='default.jpg')
-    currency = models.CharField(max_length=5, default='USD')
+    currency = models.CharField(max_length=5, default='INR')
     theme = models.CharField(max_length=10, default='light')
 
     def __str__(self):

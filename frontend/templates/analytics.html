@@ -21,7 +21,7 @@
     <div class="stat-card expense">
       <div class="stat-icon expense"><ion-icon name="trending-down-outline"></ion-icon></div>
       <div class="stat-label">All-time Expenses</div>
-      <div class="stat-value">${{ total_expense|floatformat:0 }}</div>
+      <div class="stat-value">{{ currency_symbol }}{{ total_expense|floatformat:0 }}</div>
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
@@ -29,7 +29,7 @@
       <div class="stat-icon balance"><ion-icon name="wallet-outline"></ion-icon></div>
       <div class="stat-label">Net Balance</div>
       {% with balance=total_income|add:"-"|add:total_expense %}
-      <div class="stat-value" style="font-size:1.5rem">${{ total_income|floatformat:0 }}</div>
+      <div class="stat-value" style="font-size:1.5rem">{{ currency_symbol }}{{ total_income|floatformat:0 }}</div>
       {% endwith %}
     </div>
   </div>

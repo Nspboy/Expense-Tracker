@@ -21,10 +21,10 @@
     <div class="stat-card income">
       <div class="stat-icon income"><ion-icon name="trending-up-outline"></ion-icon></div>
       <div class="stat-label">Total Income</div>
-      <div class="stat-value">${{ total_income|floatformat:0 }}</div>
+      <div class="stat-value">{{ currency_symbol }}{{ total_income|floatformat:0 }}</div>
       <div class="stat-change positive">
         <ion-icon name="arrow-up-outline"></ion-icon>
-        This month: ${{ month_income|floatformat:0 }}
+        This month: {{ currency_symbol }}{{ month_income|floatformat:0 }}
       </div>
     </div>
   </div>
@@ -33,10 +33,10 @@
     <div class="stat-card expense">
       <div class="stat-icon expense"><ion-icon name="trending-down-outline"></ion-icon></div>
       <div class="stat-label">Total Expenses</div>
-      <div class="stat-value">${{ total_expense|floatformat:0 }}</div>
+      <div class="stat-value">{{ currency_symbol }}{{ total_expense|floatformat:0 }}</div>
       <div class="stat-change negative">
         <ion-icon name="arrow-down-outline"></ion-icon>
-        This month: ${{ month_expense|floatformat:0 }}
+        This month: {{ currency_symbol }}{{ month_expense|floatformat:0 }}
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
       <div class="stat-icon balance"><ion-icon name="wallet-outline"></ion-icon></div>
       <div class="stat-label">Net Balance</div>
       <div class="stat-value" style="color:{% if balance >= 0 %}var(--income-color){% else %}var(--expense-color){% endif %}">
-        ${{ balance|floatformat:0 }}
+        {{ currency_symbol }}{{ balance|floatformat:0 }}
       </div>
       <div class="stat-change">Income − Expenses</div>
     </div>
@@ -56,7 +56,7 @@
     <div class="stat-card savings">
       <div class="stat-icon savings"><ion-icon name="cash-outline"></ion-icon></div>
       <div class="stat-label">Savings</div>
-      <div class="stat-value">${{ savings|floatformat:0 }}</div>
+      <div class="stat-value">{{ currency_symbol }}{{ savings|floatformat:0 }}</div>
       <div class="stat-change">
         <a href="{% url 'profile' %}" style="color:var(--text-muted); font-size:0.75rem">Update in profile →</a>
       </div>
@@ -151,7 +151,7 @@
             </td>
             <td class="text-muted-c text-sm">{{ exp.date|date:"M j, Y" }}</td>
             <td><span class="pay-chip">{{ exp.payment_method }}</span></td>
-            <td class="text-end amount-expense">−${{ exp.amount }}</td>
+            <td class="text-end amount-expense">−{{ currency_symbol }}{{ exp.amount }}</td>
           </tr>
           {% endfor %}
         </tbody>
