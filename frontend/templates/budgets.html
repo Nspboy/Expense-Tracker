@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Budgets{% endblock %}
+{% block page_id %}budgets{% endblock %}
+{% block page_title %}Budgets{% endblock %}
+{% block page_subtitle %}Set monthly spending limits by category{% endblock %}
+
+{% block topbar_actions %}
+<button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#budgetModal"
+        style="font-size:0.8rem; padding:8px 16px">
+  <ion-icon name="add-outline"></ion-icon> New Budget
+</button>
+{% endblock %}
+
+{% block content %}
+
+{% if budget_list %}
+<div class="row g-4">
+  {% for item in budget_list %}
+  <div class="col-sm-6 col-lg-4">
+    <div class="budget-card {% if item.pct >= 100 %}over-budget{% endif %}">
+
+      <!-- Header -->
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:38px; height:38px; border-radius:var(--radius-sm); background:{{ item.budget.category.color }}22; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+            💳
+          </div>
+          <div>
+            <div style="font-weight:700; color:var(--text-primary); font-size:0.9rem">
+              {{ item.budget.category.name }}
+            </div>
+            <div class="text-xs text-muted-c">
+              {{ item.budget.month }}/{{ item.budget.year }}
+            </div>
+          </div>
+        </div>
+        <button class="btn-danger-custom btn-delete-budget" data-id="{{ item.budget.id }}"
+                style="padding:5px 10px; font-size:0.75rem">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Progress -->
+      <div class="mb-2">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="text-xs text-muted-c">Spent</span>
+          <span class="text-xs" style="color:{% if item.pct >= 100 %}var(--expense-color){% elif item.pct >= 80 %}var(--warning-color){% else %}var(--income-color){% endif %}; font-weight:600">
+            {{ item.pct }}%
+          </span>
+        </div>
+        <div class="progress">
+          <div class="progress-bar
+            {% if item.pct >= 100 %}bg-danger{% elif item.pct >= 80 %}bg-warning{% else %}bg-success{% endif %}"
+            style="width:{{ item.pct }}%">
+          </div>
+        </div>
+      </div>
+
+      <!-- Amounts -->
+      <div class="d-flex justify-content-between mt-3">
+        <div>
+          <div class="text-xs text-muted-c">Spent</div>
+          <div style="font-weight:700; color:var(--expense-color)">${{ item.spent }}</div>
+        </div>
+        <div style="text-align:center">
+          <div class="text-xs text-muted-c">Remaining</div>
+          <div style="font-weight:700; color:{% if item.remaining == 0 %}var(--expense-color){% else %}var(--income-color){% endif %}">
+            ${{ item.remaining|floatformat:2 }}
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="text-xs text-muted-c">Limit</div>
+          <div style="font-weight:700; color:var(--text-primary)">${{ item.budget.limit_amount }}</div>
+        </div>
+      </div>
+
+      {% if item.pct >= 100 %}
+      <div style="margin-top:12px; padding:8px 12px; border-radius:var(--radius-sm); background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.2); font-size:0.75rem; color:var(--expense-color);">
+        ⚠ Budget exceeded by ${{ item.spent|floatformat:2 }}
+      </div>
+      {% elif item.pct >= 80 %}
+      <div style="margin-top:12px; padding:8px 12px; border-radius:var(--radius-sm); background:rgba(247,183,49,0.1); border:1px solid rgba(247,183,49,0.2); font-size:0.75rem; color:var(--warning-color);">
+        ⚡ Approaching limit — only ${{ item.remaining|floatformat:2 }} left
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body">
+    <div class="empty-state">
+      <ion-icon name="pie-chart-outline"></ion-icon>
+      <p>No budgets set yet.<br>
+        <button class="btn-primary-custom mt-3" data-bs-toggle="modal" data-bs-target="#budgetModal">
+          <ion-icon name="add-outline"></ion-icon> Create your first budget
+        </button>
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Budget Modal -->
+<div class="modal fade" id="budgetModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Set Budget</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label" for="bud-category">Category *</label>
+          <select id="bud-category" class="form-select">
+            <option value="">— Select Category —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="bud-limit">Monthly Limit ($) *</label>
+          <input type="number" id="bud-limit" class="form-control" placeholder="e.g. 500" step="0.01" min="0">
+        </div>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label" for="bud-month">Month *</label>
+            <select id="bud-month" class="form-select">
+              {% for num, name in months %}
+              <option value="{{ num }}" {% if num == current_month %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="bud-year">Year *</label>
+            <select id="bud-year" class="form-select">
+              {% for yr in years %}
+              <option value="{{ yr }}" {% if yr == current_year %}selected{% endif %}>{{ yr }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-primary-custom" id="btn-save-budget">
+          <ion-icon name="checkmark-outline"></ion-icon> Save Budget
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

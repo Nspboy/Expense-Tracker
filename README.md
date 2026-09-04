@@ -1,73 +1,174 @@
-# Expense Tracker Pro 🚀
+# 💰 Expense Tracker
 
-A premium, full-stack financial management system built with a **Decoupled Architecture**. This project features a high-performance **React** frontend and a robust **Django REST Framework** backend.
-
----
-
-## 🏗️ Technical Architecture
-
-This project follows industrial standards with a strict separation of concerns:
-
-- **Frontend**: A modern Single Page Application (SPA) built with Vite, React, and TanStack Query.
-- **Backend**: A stateless REST API powered by Django and JWT Authentication.
-- **Database**: SQLite3 (Production-ready for small to medium scale).
+A full-stack personal finance web application built with **Django**, **SQLite**, **Bootstrap 5**, and **Vanilla JavaScript**.
 
 ---
 
-## ✨ Key Features
+## 🏗 Project Structure
 
-- **Dashboard**: Real-time financial summaries and recent transaction insights.
-- **Expense/Income Management**: Advanced CRUD operations with searchable and filterable tables.
-- **Budget Tracking**: Visual progress bars and automated budget vs. actuals analysis.
-- **Financial Reports**: Monthly trend analysis with dynamic Chart.js visualizations.
-- **Premium UI**: Dark mode support, glassmorphic elements, and smooth Framer Motion animations.
-- **JWT Security**: Professional authentication flow with access and refresh tokens.
-
----
-
-## 🚀 Getting Started
-
-### 1. Backend Setup
-1. Navigate to the `backend` directory.
-2. Install dependencies: `pip install -r ../requirements.txt`.
-3. Run migrations: `python manage.py migrate`.
-4. Start the server: `python manage.py runserver`.
-
-### 2. Frontend Setup
-1. Navigate to the `frontend` directory.
-2. Install dependencies: `npm install`.
-3. Start the dev server: `npm run dev`.
-
----n
-
-## 📁 Repository Structure
-
-```text
-root/
-├── backend/            # Django REST API (Stateless)
-│   ├── core/           # Main project configuration
-│   ├── home/           # Financial business logic & models
-│   └── manage.py       # Django CLI
-├── frontend/           # React SPA (Vite)
-│   ├── src/            # Components, Pages, and Logic
-│   └── public/         # Static assets
-├── requirements.txt    # Unified Python dependencies
-└── .gitignore          # Professional exclusion patterns
+```
+Expense-Tracker/
+│
+├── backend/                          ← Python / Django source (server-side logic)
+│   ├── core/                         ← Django project configuration
+│   │   ├── settings.py               ← All Django settings (DB, auth, paths)
+│   │   ├── urls.py                   ← Root URL dispatcher
+│   │   ├── wsgi.py                   ← WSGI entry point
+│   │   └── asgi.py                   ← ASGI entry point
+│   │
+│   ├── home/                         ← Main Django application
+│   │   ├── models.py                 ← Database models (Expense, Income, Budget …)
+│   │   ├── views.py                  ← Session-based page views + AJAX endpoints
+│   │   ├── api_views.py              ← DRF REST API ViewSets (JWT-based)
+│   │   ├── serializers.py            ← DRF serializers
+│   │   ├── urls.py                   ← App URL patterns (pages + API)
+│   │   ├── admin.py                  ← Django admin registrations
+│   │   ├── apps.py                   ← App config
+│   │   ├── tests.py                  ← Test suite
+│   │   ├── migrations/               ← Database migration files
+│   │   └── management/
+│   │       └── commands/
+│   │           └── seed_data.py      ← Seed categories + test accounts
+│   │
+│   ├── manage.py                     ← Django management CLI
+│   ├── db.sqlite3                    ← SQLite database file
+│   └── venv/                         ← Python virtual environment
+│
+├── frontend/                         ← All frontend / UI assets
+│   ├── templates/                    ← Django HTML templates (server-rendered)
+│   │   ├── base.html                 ← Sidebar layout, Bootstrap 5, Chart.js
+│   │   ├── dashboard.html            ← Stat cards + Chart.js visualizations
+│   │   ├── expenses.html             ← Filter bar + CRUD table
+│   │   ├── income.html               ← Income list + CRUD
+│   │   ├── budgets.html              ← Budget progress cards
+│   │   ├── goals.html                ← SVG progress rings
+│   │   ├── reminders.html            ← Recurring payment tracker
+│   │   ├── analytics.html            ← 4-chart analytics dashboard
+│   │   ├── profile.html              ← User settings page
+│   │   └── auth/
+│   │       ├── login.html            ← Session login form
+│   │       └── register.html         ← Registration + password strength meter
+│   │
+│   ├── static/                       ← Static assets served by Django
+│   │   ├── css/
+│   │   │   └── style.css             ← Dark theme design system (CSS variables)
+│   │   └── js/
+│   │       └── app.js                ← AJAX CRUD, Chart.js init, modals, filters
+│   │
+│   └── react/                        ← Vite + React SPA (JWT-based, alternative UI)
+│       ├── src/
+│       │   ├── App.jsx
+│       │   ├── main.jsx
+│       │   ├── index.css
+│       │   ├── api/                  ← Axios API client
+│       │   ├── components/           ← Sidebar, Layout, ProtectedRoute …
+│       │   ├── context/              ← AuthContext, ToastContext
+│       │   ├── hooks/
+│       │   └── pages/                ← Dashboard, Expenses, Income, Analytics …
+│       ├── public/
+│       ├── dist/                     ← Production build output
+│       ├── index.html
+│       ├── package.json
+│       └── vite.config.js
+│
+├── requirements.txt                  ← Python dependencies
+├── pyrightconfig.json                ← Type-checking config
+└── README.md                         ← This file
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Quick Start (Django Template UI)
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | React, Vite, Framer Motion, Chart.js, Lucide Icons |
-| **Backend** | Django 5.x, Django REST Framework, JWT |
-| **Data** | SQLite3, TanStack Query |
-| **Styling** | Modern Vanilla CSS (Global Design System) |
+### 1. Set up the virtual environment
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate          # Windows
+# source venv/bin/activate    # macOS / Linux
+pip install -r ..\requirements.txt
+```
+
+### 2. Apply migrations & seed demo data
+
+```bash
+python manage.py migrate
+python manage.py seed_data
+```
+
+### 3. Start the development server
+
+```bash
+python manage.py runserver
+```
+
+Open **http://127.0.0.1:8000/** in your browser.
 
 ---
 
-## 🛡️ License
+## 🔑 Demo Accounts
 
-*Standard MIT License*
+| Username   | Password    | Data          |
+|------------|-------------|---------------|
+| `testuser` | `Test@1234` | 18 sample expenses, budgets, goals |
+| `demo`     | `Demo@1234` | Fresh account |
+
+---
+
+## 📄 Pages
+
+| Page        | URL           | Description                              |
+|-------------|---------------|------------------------------------------|
+| Dashboard   | `/`           | Stat cards + doughnut & line charts      |
+| Expenses    | `/expenses/`  | Filter bar + AJAX CRUD table             |
+| Income      | `/income/`    | Income records + CRUD                    |
+| Budgets     | `/budgets/`   | Monthly budget progress cards            |
+| Goals       | `/goals/`     | Savings goals with SVG progress rings    |
+| Reminders   | `/reminders/` | Recurring bill tracker                   |
+| Analytics   | `/analytics/` | 4 Chart.js charts (bar, doughnut, line)  |
+| Profile     | `/profile/`   | Edit account settings                    |
+| Admin       | `/admin/`     | Django admin panel                       |
+
+---
+
+## 🛠 Tech Stack
+
+| Layer       | Technology                          |
+|-------------|-------------------------------------|
+| Backend     | Python 3.11, Django 5.0, SQLite     |
+| REST API    | Django REST Framework + JWT         |
+| Frontend    | Bootstrap 5, Vanilla JS, Chart.js   |
+| React SPA   | Vite + React 18 (in `frontend/react/`) |
+
+---
+
+## 🔌 REST API (JWT)
+
+```
+POST  /api/token/          — Obtain JWT token pair
+POST  /api/token/refresh/  — Refresh access token
+POST  /api/register/       — Register new user
+
+GET/POST   /api/expenses/
+GET/POST   /api/income/
+GET/POST   /api/budgets/
+GET/POST   /api/goals/
+GET/POST   /api/reminders/
+GET/PATCH  /api/profile/me/
+GET        /api/summary/
+```
+
+---
+
+## ⚙️ Key Settings (`backend/core/settings.py`)
+
+```python
+BASE_DIR     = backend/               # Django project root
+ROOT_DIR     = Expense-Tracker/       # Repository root
+FRONTEND_DIR = Expense-Tracker/frontend/   # All UI assets
+
+TEMPLATES DIRS      → frontend/templates/
+STATICFILES_DIRS    → frontend/static/
+DATABASE            → backend/db.sqlite3
+```

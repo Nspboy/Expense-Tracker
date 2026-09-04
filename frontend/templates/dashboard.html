@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_id %}dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ request.user.first_name|default:request.user.username }} 👋{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'expenses' %}" class="btn-primary-custom" style="font-size:0.8rem; padding:8px 16px">
+  <ion-icon name="add-outline"></ion-icon> Add Expense
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat Cards ─────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card income">
+      <div class="stat-icon income"><ion-icon name="trending-up-outline"></ion-icon></div>
+      <div class="stat-label">Total Income</div>
+      <div class="stat-value">${{ total_income|floatformat:0 }}</div>
+      <div class="stat-change positive">
+        <ion-icon name="arrow-up-outline"></ion-icon>
+        This month: ${{ month_income|floatformat:0 }}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card expense">
+      <div class="stat-icon expense"><ion-icon name="trending-down-outline"></ion-icon></div>
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-value">${{ total_expense|floatformat:0 }}</div>
+      <div class="stat-change negative">
+        <ion-icon name="arrow-down-outline"></ion-icon>
+        This month: ${{ month_expense|floatformat:0 }}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card balance">
+      <div class="stat-icon balance"><ion-icon name="wallet-outline"></ion-icon></div>
+      <div class="stat-label">Net Balance</div>
+      <div class="stat-value" style="color:{% if balance >= 0 %}var(--income-color){% else %}var(--expense-color){% endif %}">
+        ${{ balance|floatformat:0 }}
+      </div>
+      <div class="stat-change">Income − Expenses</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card savings">
+      <div class="stat-icon savings"><ion-icon name="cash-outline"></ion-icon></div>
+      <div class="stat-label">Savings</div>
+      <div class="stat-value">${{ savings|floatformat:0 }}</div>
+      <div class="stat-change">
+        <a href="{% url 'profile' %}" style="color:var(--text-muted); font-size:0.75rem">Update in profile →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row ─────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+  <!-- Doughnut: Expenses by Category -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="card-title">Spending by Category</span>
+        <a href="{% url 'analytics' %}" class="text-sm text-accent">View all →</a>
+      </div>
+      <div class="card-body d-flex flex-column">
+        {% if cat_values != '[]' %}
+        <div class="chart-container" style="max-height:280px">
+          <canvas id="catDoughnutChart"
+                  data-labels="{{ cat_labels }}"
+                  data-values="{{ cat_values }}"
+                  data-colors="{{ cat_colors }}">
+          </canvas>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <ion-icon name="pie-chart-outline"></ion-icon>
+          <p>No expense data yet. <a href="{% url 'expenses' %}">Add your first expense</a></p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Line: Monthly Trend -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="card-title">Income vs Expenses — Last 6 Months</span>
+        <a href="{% url 'analytics' %}" class="text-sm text-accent">Full analytics →</a>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="max-height:280px">
+          <canvas id="trendLineChart"
+                  data-labels="{{ months_labels }}"
+                  data-income="{{ income_data }}"
+                  data-expense="{{ expense_data }}">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Recent Transactions ─────────────────────── -->
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span class="card-title">Recent Transactions</span>
+    <a href="{% url 'expenses' %}" class="text-sm text-accent">View all →</a>
+  </div>
+  <div class="card-body p-0">
+    {% if recent_expenses %}
+    <div class="table-responsive">
+      <table class="table table-dark-custom mb-0">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Payment</th>
+            <th class="text-end">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exp in recent_expenses %}
+          <tr>
+            <td>
+              <div style="font-weight:600; color:var(--text-primary)">{{ exp.title }}</div>
+              {% if exp.notes %}<div class="text-xs text-muted-c">{{ exp.notes|truncatechars:40 }}</div>{% endif %}
+            </td>
+            <td>
+              {% if exp.category %}
+              <span class="cat-badge">
+                <span class="cat-dot" style="background:{{ exp.category.color }}"></span>
+                {{ exp.category.name }}
+              </span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-muted-c text-sm">{{ exp.date|date:"M j, Y" }}</td>
+            <td><span class="pay-chip">{{ exp.payment_method }}</span></td>
+            <td class="text-end amount-expense">−${{ exp.amount }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <ion-icon name="receipt-outline"></ion-icon>
+      <p>No transactions yet. <a href="{% url 'expenses' %}">Add your first expense →</a></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

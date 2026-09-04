@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics{% endblock %}
+{% block page_id %}analytics{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block page_subtitle %}Deep dive into your financial patterns{% endblock %}
+
+{% block content %}
+
+<!-- ── KPI Row ────────────────────────────────── -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card income">
+      <div class="stat-icon income"><ion-icon name="trending-up-outline"></ion-icon></div>
+      <div class="stat-label">All-time Income</div>
+      <div class="stat-value">${{ total_income|floatformat:0 }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card expense">
+      <div class="stat-icon expense"><ion-icon name="trending-down-outline"></ion-icon></div>
+      <div class="stat-label">All-time Expenses</div>
+      <div class="stat-value">${{ total_expense|floatformat:0 }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card balance">
+      <div class="stat-icon balance"><ion-icon name="wallet-outline"></ion-icon></div>
+      <div class="stat-label">Net Balance</div>
+      {% with balance=total_income|add:"-"|add:total_expense %}
+      <div class="stat-value" style="font-size:1.5rem">${{ total_income|floatformat:0 }}</div>
+      {% endwith %}
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card savings">
+      <div class="stat-icon savings"><ion-icon name="analytics-outline"></ion-icon></div>
+      <div class="stat-label">Savings Rate</div>
+      <div class="stat-value" style="font-size:1.5rem">
+        {% if total_income > 0 %}
+          {{ total_income|floatformat:0 }}
+        {% else %}0{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Monthly Bar + Daily Line ───────────────── -->
+<div class="row g-4 mb-4">
+
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="card-title">Monthly Income vs Expenses (12 months)</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="max-height:300px">
+          <canvas id="monthlyBarChart"
+                  data-labels="{{ months_labels }}"
+                  data-income="{{ income_data }}"
+                  data-expense="{{ expense_data }}">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="card-title">Spending by Payment Method</span>
+      </div>
+      <div class="card-body d-flex flex-column">
+        {% if pay_values != '[]' %}
+        <div class="chart-container" style="max-height:280px">
+          <canvas id="payDoughnutChart"
+                  data-labels="{{ pay_labels }}"
+                  data-values="{{ pay_values }}">
+          </canvas>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <ion-icon name="card-outline"></ion-icon>
+          <p>No payment data yet</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Category Bar + Daily Line ──────────────── -->
+<div class="row g-4">
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="card-title">Expenses by Category (All Time)</span>
+      </div>
+      <div class="card-body">
+        {% if cat_values != '[]' %}
+        <div class="chart-container" style="max-height:320px">
+          <canvas id="catBarChart"
+                  data-labels="{{ cat_labels }}"
+                  data-values="{{ cat_values }}"
+                  data-colors="{{ cat_colors }}">
+          </canvas>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+          <p>No category data yet</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="card-title">Daily Spending — Last 30 Days</span>
+      </div>
+      <div class="card-body">
+        {% if daily_values != '[]' %}
+        <div class="chart-container" style="max-height:320px">
+          <canvas id="dailyLineChart"
+                  data-labels="{{ daily_labels }}"
+                  data-values="{{ daily_values }}">
+          </canvas>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <ion-icon name="pulse-outline"></ion-icon>
+          <p>No spending data in the last 30 days</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -13,10 +13,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
-from django.core import mail
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# BASE_DIR = backend/
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# ROOT_DIR = project root (Expense-Tracker/)
+ROOT_DIR = os.path.dirname(BASE_DIR)
+
+# FRONTEND_DIR = frontend/
+FRONTEND_DIR = os.path.join(ROOT_DIR, 'frontend')
 
 
 # Quick-start development settings - unsuitable for production
@@ -62,7 +67,8 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        # Templates live in frontend/templates/ (separate from backend Python code)
+        'DIRS': [os.path.join(FRONTEND_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -126,7 +132,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS=[]
+# Static assets (CSS/JS) live in frontend/static/ (separate from backend Python code)
+STATICFILES_DIRS = [
+    os.path.join(FRONTEND_DIR, 'static'),
+]
+
+# Session-based auth redirect URLs
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 
 MESSAGE_TAGS = {
@@ -141,7 +155,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 
-MEDIA_ROOT = os.path.join(BASE_DIR,'static/img')
+MEDIA_ROOT = os.path.join(FRONTEND_DIR, 'static', 'img')
 MEDIA_URL = '/img/'
 
 REST_FRAMEWORK = {

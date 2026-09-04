@@ -102,5 +102,9 @@ class Goal(models.Model):
     target_amount = models.BigIntegerField()
     current_amount = models.BigIntegerField(default=0)
     end_date = models.DateField()
-   
 
+    @property
+    def progress_percentage(self):
+        if self.target_amount == 0:
+            return 0
+        return min(int((self.current_amount / self.target_amount) * 100), 100)
