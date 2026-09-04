@@ -12,8 +12,8 @@ cd backend
 python manage.py collectstatic --noinput --settings=core.settings
 cd ..
 
-echo "==> Copying static files to staticfiles_build/ for Vercel..."
-mkdir -p staticfiles_build
-cp -r backend/staticfiles/. staticfiles_build/
+echo "==> Copying static files to staticfiles_build/static/ for Vercel..."
+mkdir -p staticfiles_build/static
+cp -r backend/staticfiles/. staticfiles_build/static/
 
 echo "==> Build complete."
