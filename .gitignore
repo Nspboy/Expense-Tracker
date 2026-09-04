@@ -3,12 +3,18 @@
 __pycache__/
 db.sqlite3
 media/
-static/
+
+# Collected static files (Vercel regenerates these during build)
+backend/staticfiles/
+staticfiles_build/
+
+# Virtual environment
+venv/
+.env
 
 # Frontend
 node_modules/
 dist/
-.env
 .DS_Store
 
 # IDE

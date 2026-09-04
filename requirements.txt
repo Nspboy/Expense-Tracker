@@ -3,4 +3,5 @@ djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
 Pillow
+whitenoise>=6.0
 waitress>=3.0
