@@ -154,6 +154,11 @@ STATICFILES_DIRS = [
 # Output directory for collectstatic (used in production / Vercel build)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# In development, tell WhiteNoise to serve directly from STATICFILES_DIRS and auto-refresh
+if not IS_PRODUCTION:
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
+
 # WhiteNoise: compress & cache static files forever in production
 STATICFILES_STORAGE = (
     'whitenoise.storage.CompressedManifestStaticFilesStorage'
